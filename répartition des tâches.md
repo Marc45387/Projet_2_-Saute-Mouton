@@ -27,7 +27,12 @@ algo de recherche(bonus)
 
 module de gravité, vitesse 
 
-fichier --> img, doc de code
+fichier --> img, doc de code, fichier de niveau 
 
-rôle: testeur teste le code et écrit un docstring
-programmeur: écrit le code  
+rôle:
+- testeur teste le code et écrit un docstring
+- programmeur: écrit le code  
+
+blabla: - pour tracer la ligne on fait un clic gauche et oon récupère les coordonnés  
+          du clic puis ensuite on utilise fltk pour tracer 
+        - 
