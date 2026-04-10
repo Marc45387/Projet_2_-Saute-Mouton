@@ -1,6 +1,5 @@
 from fltk import * 
 
-
 class Interface:
     def __init__(self):
         """
@@ -8,73 +7,157 @@ class Interface:
         """
         self.HAUTEUR = 400 
         self.LONGUEUR = 400 
-    
+        self.perso = {"x": 100, "y": 575, "w": 20, "h": 20}    
+        self.murs = [(60, 460, 200, 470),
+                    (260, 360, 400, 370),
+                    (60, 60, 200, 70),
+                    (180, 260, 300, 270)]
+
     def page_de_garde(self):
         """
         la page de départ avec un titre et quelque bouton
         """
-        efface_tout 
-        texte(180,40,'Saute Mouton', taille = 30)
+        efface_tout()  
+        texte(180, 40, 'Saute Mouton', taille=30)
         
-        rectangle(210,200,400,150, couleur = 'black', remplissage = 'white')
-        texte(220,160,'Commencer')
+        rectangle(210, 150, 400, 200, couleur='black', remplissage='white')
+        texte(220, 160, 'Commencer')
 
-        rectangle(200,300,400,250, couleur = 'black', remplissage = 'white')
-        texte(210,260,'Règle du jeu')
+        rectangle(200, 250, 400, 300, couleur='black', remplissage='white')
+        texte(210, 260, 'Règle du jeu')
 
         while True:
             ev = attend_ev()
             tev = type_ev(ev)
-            x,  y = abscisse(ev), ordonnee(ev)
+            
             if tev == 'Quitte':
                 ferme_fenetre()
+                break 
+                
             if tev == 'ClicGauche':
-                if 200 <= x <= 400 and 200 <= y <= 150:
-                    self.page_niveau()  
-                if 200 <= x <= 400 and 300 <= y <= 250:
-                    self.page_regle()
-                mise_a_jour()
-            
+                x, y = abscisse(ev), ordonnee(ev)
+                
+                if 210 <= x <= 400 and 150 <= y <= 200:
+                    self.page_niveau()
+                    break 
 
+                # Vérification Règles : x entre 200 et 400, y entre 250 et 300
+                if 200 <= x <= 400 and 250 <= y <= 300:
+                    self.page_regle()
+                    break
+            
+            mise_a_jour()
+            
     def page_niveau(self):
         """
-        page de niveau des étages
+        page de choix des niveaux avec 3 carrés dessinés par une boucle
         """
-        efface_tout
-        texte(160,40,'Choix du niveaux', taille = 30)
+        efface_tout()
+        texte(150, 20, 'Choix du niveau', taille=30)
         
-        rectangle(100,140,500,350)
-        rectangle(150,200,200,150, couleur = 'black', remplissage = 'white')
+        rectangle(90,70,510,430)
+       
+        # case de coche
+        rectangle(130,110,170,150)
+        rectangle(130,210,170,250)
+        rectangle(130,310,170,350)
         
-        rectangle(100,140,500,350)
-        texte(320,370,'Continue')
+        # bouton retour pour tester
+        rectangle(10, 550, 140, 590)
+        texte(30, 550, 'Retour')
 
-        attend_ev()
+        rectangle(420, 550, 580, 590)
+        texte(430, 550, 'Continue')
         
-        # à terminer
+        etat1 = False
+        etat2 = False
+        etat3 = False
+        while True:
+            ev = attend_ev()
+            tev = type_ev(ev)
+            if tev == 'Quitte':
+                ferme_fenetre()
+                break
+            if tev == 'ClicGauche':
+                x, y = abscisse(ev), ordonnee(ev)
+                if 10 <= x <= 140 and 550 <= y <= 590:
+                    self.page_de_garde()
+                    break
+                if 420 <= x <= 580 and  550 <= y <= 590:
+                    self.page_jeu()
+                if 130 <= x <= 170 and 110 <= y <= 150:
+                    if not etat1:
+                        texte(130,100,'X',tag= 'teste1',taille = 40)
+                        etat1 = True
+                    else:
+                        efface('teste1')
+                        etat1 = False
+                
+                if 130 <= x <= 170 and 210 <= y <= 250:
+                    if not etat2:
+                        texte(130,200,'X',tag= 'teste2',taille = 40)
+                        etat2 = True
+                    else:
+                        efface('teste2')
+                        etat2 = False
+                if 130 <= x <= 170 and 310 <= y <= 350:
+                    if not etat3:
+                        texte(130,300,'X',tag= 'teste3',taille = 40)
+                        etat3 = True
+                    else:
+                        efface('teste3')
+                        etat3 = False
+                mise_a_jour()
 
     def page_regle(self):
         """
         page des consignes et règle du jeu 
         """
-        efface_tout
-        rectangle(120,100,520,350,epaisseur = 3)
+        efface_tout()
+        rectangle(120,50,520,450,epaisseur = 3)
         
-        rectangle(10,370,90,400)
-        texte(20,380,'Retour')
+        rectangle(10,550,140,590)
+        texte(20,550,'Retour')
         
         while True:
             ev = attend_ev()
             tev = type_ev(ev)
-            x, y = abscisse(ev), ordonnee(ev)
+            if tev == 'Quitte':
+                ferme_fenetre()
+                break
+            if tev == 'ClicGauche':
+                x, y = abscisse(ev), ordonnee(ev)
+                if 10 <= x <= 140 and 550 <= y <= 590:
+                    self.page_de_garde()
+                    break
+            mise_a_jour()
 
-        # à terminer
+    def dessiner(self):
+            efface_tout()
+            rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
 
+            for m in self.murs:
+                rectangle(m[0], m[1], m[2], m[3], remplissage='blue')
+            rectangle(self.perso["x"], self.perso["y"], self.perso["x"] + self.perso["w"], self.perso["y"] + self.perso["h"], remplissage='orange')
+
+    def page_jeu(self):
+        efface_tout()
+
+        while True:
+            self.dessiner()
+            ev = attend_ev()
+            tev = type_ev(ev)
+
+            if tev == 'Quitte':
+                ferme_fenetre()
+                break            
+            mise_a_jour()
+    
     def run(self):
         """
         lancement du création de la fenetre 
         """
-        x, y  = self.LONGUEUR * 1.5, self.HAUTEUR  
+        x, y  = self.LONGUEUR * 1.5, self.HAUTEUR * 1.5  
         cree_fenetre(x,y)
         self.page_de_garde()
 
