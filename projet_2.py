@@ -1,4 +1,7 @@
 from fltk import * 
+from pathlib import Path 
+
+BASE_DIR = Path(__file__).parent
 
 class Interface:
     def __init__(self):
@@ -8,7 +11,9 @@ class Interface:
         self.HAUTEUR = 400 
         self.LONGUEUR = 400 
         self.perso = {"x": 100, "y": 575, "w": 20, "h": 20}    
-        self.murs = [(60, 460, 200, 470),
+        self.perso_visible = True
+        self.cible = None
+        self.lst_bloc = [(60, 460, 200, 470),
                     (260, 360, 400, 370),
                     (60, 60, 200, 70),
                     (180, 260, 300, 270)]
@@ -62,13 +67,16 @@ class Interface:
         rectangle(130,210,170,250)
         rectangle(130,310,170,350)
         
-        # bouton retour pour tester
+        # bouton retour et continue
         rectangle(10, 550, 140, 590)
         texte(30, 550, 'Retour')
-
         rectangle(420, 550, 580, 590)
         texte(430, 550, 'Continue')
         
+        # texte
+        texte(200,110,'Niveau 0')
+        texte(200,210,'Niveau 1')
+        texte(200,310,'Niveau random')
         etat1 = False
         etat2 = False
         etat3 = False
@@ -114,10 +122,21 @@ class Interface:
         page des consignes et règle du jeu 
         """
         efface_tout()
+        img = BASE_DIR / "souris.png"
+    
+        rectangle(0,0,700,700,remplissage = 'white')
         rectangle(120,50,520,450,epaisseur = 3)
         
         rectangle(10,550,140,590)
-        texte(20,550,'Retour')
+        texte(20,550,'Retour')  
+
+        
+        image(320, 250, str(img), largeur=200, hauteur=200, ancrage='center')
+        
+        ligne(240,130,280,180)
+        texte(200,90,'Viser')
+        ligne(420,130,360,180)
+        texte(400,90,'Sauter')
         
         while True:
             ev = attend_ev()
@@ -134,15 +153,19 @@ class Interface:
 
     def dessiner(self):
             efface_tout()
+            # cadre global 
             rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
-
-            for m in self.murs:
+            rectangle(80,40,100,60,remplissage = 'yellow') # rectangle de point d'arrivé
+            for m in self.lst_bloc:
                 rectangle(m[0], m[1], m[2], m[3], remplissage='blue')
-            rectangle(self.perso["x"], self.perso["y"], self.perso["x"] + self.perso["w"], self.perso["y"] + self.perso["h"], remplissage='orange')
+            if self.cible is not None:
+                ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
+            if self.perso_visible is not None:
+                rectangle(self.perso["x"], self.perso["y"], self.perso["x"] + self.perso["w"], self.perso["y"] + self.perso["h"], remplissage='orange', tag='perso')
 
     def page_jeu(self):
         efface_tout()
-
+        self.perso_visible = True
         while True:
             self.dessiner()
             ev = attend_ev()
@@ -151,6 +174,19 @@ class Interface:
             if tev == 'Quitte':
                 ferme_fenetre()
                 break            
+
+            if tev == 'ClicGauche':
+                self.cible = (abscisse(ev), ordonnee(ev))
+                ligne(self.perso['x'] + 10 ,self.perso['y'] + 10,abscisse(ev),ordonnee(ev))
+                print(f"Visée fixée sur : {self.cible}")
+                attend_ev()
+            
+            if tev == 'ClicDroit':
+                self.cible = ((abscisse(ev),ordonnee(ev)))
+                self.perso_visible = not self.perso_visible
+                
+                if not self.perso_visible:
+                    efface('perso') # Optionnel car dessiner() s'en occupe
             mise_a_jour()
     
     def run(self):
