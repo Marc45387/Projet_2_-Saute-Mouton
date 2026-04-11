@@ -23,11 +23,12 @@ class Interface:
         la page de départ avec un titre et quelque bouton
         """
         efface_tout()  
+        # titre
         texte(180, 40, 'Saute Mouton', taille=30)
         
+        # boutons 
         rectangle(210, 150, 400, 200, couleur='black', remplissage='white')
         texte(220, 160, 'Commencer')
-
         rectangle(200, 250, 400, 300, couleur='black', remplissage='white')
         texte(210, 260, 'Règle du jeu')
 
@@ -46,7 +47,7 @@ class Interface:
                     self.page_niveau()
                     break 
 
-                # Vérification Règles : x entre 200 et 400, y entre 250 et 300
+                # zone de détecte 
                 if 200 <= x <= 400 and 250 <= y <= 300:
                     self.page_regle()
                     break
@@ -77,6 +78,8 @@ class Interface:
         texte(200,110,'Niveau 0')
         texte(200,210,'Niveau 1')
         texte(200,310,'Niveau random')
+
+        # variable à modifier 
         etat1 = False
         etat2 = False
         etat3 = False
@@ -93,6 +96,7 @@ class Interface:
                     break
                 if 420 <= x <= 580 and  550 <= y <= 590:
                     self.page_jeu()
+                
                 if 130 <= x <= 170 and 110 <= y <= 150:
                     if not etat1:
                         texte(130,100,'X',tag= 'teste1',taille = 40)
@@ -122,7 +126,7 @@ class Interface:
         page des consignes et règle du jeu 
         """
         efface_tout()
-        img = BASE_DIR / "souris.png"
+        img = BASE_DIR / "img/souris.png"
     
         rectangle(0,0,700,700,remplissage = 'white')
         rectangle(120,50,520,450,epaisseur = 3)
@@ -186,7 +190,7 @@ class Interface:
                 self.perso_visible = not self.perso_visible
                 
                 if not self.perso_visible:
-                    efface('perso') # Optionnel car dessiner() s'en occupe
+                    efface('perso') 
             mise_a_jour()
     
     def run(self):
