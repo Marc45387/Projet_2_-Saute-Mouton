@@ -69,7 +69,7 @@ class Mouton:
                     if self.x + (self.LARGEUR/2) < bloc["ax"] + (bloc["bx"]/2):
                         self.x = bloc["ax"] - self.LARGEUR - 1
                     else:
-                        self.x = bloc["ax"] + bloc["bx"] + 1
+                        self.x = bloc["bx"] + 1
 
     def check_arrivee(self, arrivee: dict):
         #par dessus
@@ -86,8 +86,11 @@ class Mouton:
     
     def impulsion(self, souris_x: int, souris_y: int):
         """ ... """
-        difference_x = souris_x - self.x
-        difference_y = souris_y - self.y
+        centre_x = self.x + (self.LARGEUR/2)
+        centre_y = self.y + (self.HAUTEUR/2)
+        
+        difference_x = souris_x - centre_x
+        difference_y = souris_y - centre_y
 
         scale = 0.15
         sensi_x = difference_x * scale

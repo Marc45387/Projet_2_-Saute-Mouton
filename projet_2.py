@@ -172,8 +172,8 @@ class Interface:
                 centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
                 centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
                 #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
-                dx = (self.cible[0] - centre_x) * 0.1 
-                dy = (self.cible[1] - centre_y) * 0.1
+                dx = (self.cible[0] - centre_x) * 0.15 
+                dy = (self.cible[1] - centre_y) * 0.15
 
                 if dx > self.mouton.VMAX_X: dx = self.mouton.VMAX_X
                 elif dx < -self.mouton.VMAX_X: dx = -self.mouton.VMAX_X
