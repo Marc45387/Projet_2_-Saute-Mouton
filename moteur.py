@@ -46,7 +46,7 @@ class Mouton:
                 self.x + self.HAUTEUR > bloc["ax"] and 
                 self.y < bloc["by"] and 
                 self.y + self.LARGEUR > bloc["ay"]):
-                print(True)
+                #print(True)
                 
                 #cas 1 : on tombe dessus(vy > 0)
                 if self.vy > 0 and (self.y + self.HAUTEUR - self.vy) <= bloc["ay"]:
@@ -75,7 +75,7 @@ class Mouton:
         #par dessus
          if (arrivee["ax"] <= self.x <= arrivee["bx"]  and 
              arrivee["ay"] <= self.y <= arrivee["by"]):
-             print("VICTOIRE")
+             #print("VICTOIRE")
              self.victoire = True
         
     def check_collisions(self, obstacles: list, arrivee: dict):

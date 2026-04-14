@@ -194,38 +194,48 @@ class Interface:
     def page_jeu(self):
         efface_tout()
         self.perso_visible = True
+        self.mouton.victoire = False
+        self.cible = None
+        self.mouton.en_mouvement = False
+
+        self.mouton.x = 100 
+        self.mouton.y = 575
+        self.mouton.vx = 0
+        self.mouton.vy = 0
+        efface_tout()
         while True:
             self.mouton.deplacer(self.lst_bloc, self.arrivee)
             self.dessiner()
-            ev = donne_ev()
-            tev = type_ev(ev)
             
             if self.mouton.victoire:
-                texte(200, 300, "GAGNÉ !", couleur='red', taille=50)
-                mise_a_jour()
-                sleep(3)
-                ferme_fenetre()
+                rectangle(200,200,400,400,remplissage = 'white')
+                texte(370, 200, "X", couleur='red', taille=30)
+                texte(220,270,'Victoire',taille='40')
+            ev = donne_ev()
+            tev = type_ev(ev)
 
-
-            if tev == 'Quitte':
-                ferme_fenetre()
-                break            
-
-            if tev == 'ClicGauche' and self.mouton.en_mouvement == False: #( si on veut jouer saut par saut, enlever la 2eme conditon)
-                self.cible = (abscisse(ev), ordonnee(ev))
-                print(f"Visée fixée sur : {self.cible}")
+            if ev is not None:
+                x,y = abscisse(ev), ordonnee(ev)
+                
+                if tev == 'Quitte':
+                    ferme_fenetre()
+                    break            
+                
+                if self.mouton.victoire:
+                    if 370 <= x <= 400 and 200 <= y <= 230:
+                        self.mouton.victoire = False
+                        self.page_de_garde()
+                        break 
+                if not self.mouton.victoire:
+                    if tev == 'ClicGauche' and self.mouton.en_mouvement == False: #( si on veut jouer saut par saut, enlever la 2eme conditon)
+                        self.cible = (abscisse(ev), ordonnee(ev))
+                        print(f"Visée fixée sur : {self.cible}")
         
-                
-            
-            if tev == 'ClicDroit':
-                if self.cible is not None:
-                    self.mouton.impulsion(self.cible[0], self.cible[1])
-                    print("SAUUUUUUT")
-                    self.cible = None
-                #self.perso_visible = not self.perso_visible
-                
-                #if not self.perso_visible:
-                    #efface('perso') 
+                    if tev == 'ClicDroit':
+                        if self.cible is not None:
+                            self.mouton.impulsion(self.cible[0], self.cible[1])
+                            print("SAUUUUUUT")
+                            self.cible = None
             mise_a_jour()
             sleep(1/60)
     
