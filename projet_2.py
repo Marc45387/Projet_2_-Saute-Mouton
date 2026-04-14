@@ -1,5 +1,7 @@
 from fltk import * 
 from pathlib import Path 
+from moteur import *
+from time import *
 
 BASE_DIR = Path(__file__).parent
 
@@ -13,10 +15,13 @@ class Interface:
         self.perso = {"x": 100, "y": 575, "w": 20, "h": 20}    
         self.perso_visible = True
         self.cible = None
-        self.lst_bloc = [(60, 460, 200, 470),
-                    (260, 360, 400, 370),
-                    (60, 60, 200, 70),
-                    (180, 260, 300, 270)]
+        self.mouton = Mouton(100,575)
+        self.EPAISSEUR = 20
+        self.arrivee = {"ax" : 80,"ay" : 40,"bx" : 100, "by" : 60}
+        self.lst_bloc = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
+                         {"ax" : 260,"ay" : 360,"bx" : 400, "by" : 370},
+                         {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
+                         {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
 
     def page_de_garde(self):
         """
@@ -159,39 +164,70 @@ class Interface:
             efface_tout()
             # cadre global 
             rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
-            rectangle(80,40,100,60,remplissage = 'yellow') # rectangle de point d'arrivé
+            rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
             for m in self.lst_bloc:
-                rectangle(m[0], m[1], m[2], m[3], remplissage='blue')
+                rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
+                # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
             if self.cible is not None:
-                ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
+                centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
+                centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
+                #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
+                dx = (self.cible[0] - centre_x) * 0.1 
+                dy = (self.cible[1] - centre_y) * 0.1
+
+                if dx > self.mouton.VMAX_X: dx = self.mouton.VMAX_X
+                elif dx < -self.mouton.VMAX_X: dx = -self.mouton.VMAX_X
+                
+                if dy > self.mouton.VMAX_Y: dy = self.mouton.VMAX_Y
+                elif dy < -self.mouton.VMAX_Y: dy = -self.mouton.VMAX_Y
+
+                visuel_x = centre_x + (dx * 5)
+                visuel_y = centre_y + (dy * 5)
+
+                # On dessine la ligne qui montre le futur saut
+                ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
+                    
             if self.perso_visible is not None:
-                rectangle(self.perso["x"], self.perso["y"], self.perso["x"] + self.perso["w"], self.perso["y"] + self.perso["h"], remplissage='orange', tag='perso')
+                #rectangle(self.perso["x"], self.perso["y"], self.perso["x"] + self.perso["w"], self.perso["y"] + self.perso["h"], remplissage='orange', tag='perso')
+                rectangle(self.mouton.x, self.mouton.y, self.mouton.x + self.mouton.LARGEUR, self.mouton.y + self.mouton.HAUTEUR, remplissage='orange', tag='perso')
 
     def page_jeu(self):
         efface_tout()
         self.perso_visible = True
         while True:
+            self.mouton.deplacer(self.lst_bloc, self.arrivee)
             self.dessiner()
-            ev = attend_ev()
+            ev = donne_ev()
             tev = type_ev(ev)
+            
+            if self.mouton.victoire:
+                texte(200, 300, "GAGNÉ !", couleur='red', taille=50)
+                mise_a_jour()
+                sleep(3)
+                ferme_fenetre()
+
 
             if tev == 'Quitte':
                 ferme_fenetre()
                 break            
 
-            if tev == 'ClicGauche':
+            if tev == 'ClicGauche' and self.mouton.en_mouvement == False: #( si on veut jouer saut par saut, enlever la 2eme conditon)
                 self.cible = (abscisse(ev), ordonnee(ev))
-                ligne(self.perso['x'] + 10 ,self.perso['y'] + 10,abscisse(ev),ordonnee(ev))
                 print(f"Visée fixée sur : {self.cible}")
-                attend_ev()
+        
+                
             
             if tev == 'ClicDroit':
-                self.cible = ((abscisse(ev),ordonnee(ev)))
-                self.perso_visible = not self.perso_visible
+                if self.cible is not None:
+                    self.mouton.impulsion(self.cible[0], self.cible[1])
+                    print("SAUUUUUUT")
+                    self.cible = None
+                #self.perso_visible = not self.perso_visible
                 
-                if not self.perso_visible:
-                    efface('perso') 
+                #if not self.perso_visible:
+                    #efface('perso') 
             mise_a_jour()
+            sleep(1/60)
     
     def run(self):
         """
