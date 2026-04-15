@@ -22,6 +22,7 @@ class Interface:
                          {"ax" : 260,"ay" : 360,"bx" : 400, "by" : 370},
                          {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
+        
 
     def page_de_garde(self):
         """
@@ -30,12 +31,13 @@ class Interface:
         efface_tout()  
         # titre
         texte(180, 40, 'Saute Mouton', taille=30)
-        
+        img = BASE_DIR / "img/main_menu.png"
         # boutons 
         rectangle(210, 150, 400, 200, couleur='black', remplissage='white')
         texte(220, 160, 'Commencer')
         rectangle(200, 250, 400, 300, couleur='black', remplissage='white')
         texte(210, 260, 'Règle du jeu')
+        image(300,300,str(img))
 
         while True:
             ev = attend_ev()
@@ -48,16 +50,16 @@ class Interface:
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
                 
-                if 210 <= x <= 400 and 150 <= y <= 200:
+                if 120 <= x <= 440 and 280 <= y <= 350:
                     self.page_mode()
                     break 
 
                 # zone de détecte 
-                if 200 <= x <= 400 and 250 <= y <= 300:
+                if 120 <= x <= 440 and 370 <= y <= 440:
                     self.page_regle()
                     break
-            
             mise_a_jour()
+
     def page_mode(self):
         
         efface_tout()
@@ -131,7 +133,7 @@ class Interface:
 
     def page_niveau(self):
         """
-        page de choix des niveaux avec 3 carrés dessinés par une boucle
+        page de choix des niveaux avec 3 carrés dessinés
         """
         efface_tout()
         texte(150, 20, 'Choix du niveau', taille=30)
@@ -239,7 +241,8 @@ class Interface:
 
     def dessiner(self):
             efface_tout()
-            # cadre global 
+            # cadre global
+            img = BASE_DIR / "img/mouton.png"
             rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
             rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
             for m in self.lst_bloc:
@@ -265,8 +268,7 @@ class Interface:
                 ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
                     
             if self.perso_visible is not None:
-                #rectangle(self.perso["x"], self.perso["y"], self.perso["x"] + self.perso["w"], self.perso["y"] + self.perso["h"], remplissage='orange', tag='perso')
-                rectangle(self.mouton.x, self.mouton.y, self.mouton.x + self.mouton.LARGEUR, self.mouton.y + self.mouton.HAUTEUR, remplissage='orange', tag='perso')
+                image(self.mouton.x,self.mouton.y,str(img))
 
     def page_jeu(self):
         efface_tout()
@@ -320,7 +322,7 @@ class Interface:
         """
         lancement du création de la fenetre 
         """
-        x, y  = self.LONGUEUR * 1.5, self.HAUTEUR * 1.5  
+        x, y  = self.LONGUEUR * 1.5, self.HAUTEUR * 1.5 
         cree_fenetre(x,y)
         self.page_de_garde()
 
