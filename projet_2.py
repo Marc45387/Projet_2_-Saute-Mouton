@@ -49,7 +49,7 @@ class Interface:
                 x, y = abscisse(ev), ordonnee(ev)
                 
                 if 210 <= x <= 400 and 150 <= y <= 200:
-                    self.page_niveau()
+                    self.page_mode()
                     break 
 
                 # zone de détecte 
@@ -58,7 +58,77 @@ class Interface:
                     break
             
             mise_a_jour()
-            
+    def page_mode(self):
+        
+        efface_tout()
+        texte(150, 20, 'Choix du mode', taille=30)
+        
+        rectangle(90,70,510,430)
+       
+        # case de coche
+        rectangle(130,110,170,150)
+        rectangle(130,210,170,250)
+        rectangle(130,310,170,350)
+        
+        # bouton retour et continue
+        rectangle(10, 550, 140, 590)
+        texte(30, 550, 'Retour')
+        rectangle(420, 550, 580, 590)
+        texte(430, 550, 'Continue')
+        
+        # texte
+        texte(200,110,'Normal')
+        texte(200,210,'Téléportation')
+        texte(200,310,'Infinie')
+
+        # variable à modifier 
+        etat1 = False
+        etat2 = False
+        etat3 = False
+        choix = None
+        while True:
+            ev = attend_ev()
+            tev = type_ev(ev)
+            if tev == 'Quitte':
+                ferme_fenetre()
+                break
+            if tev == 'ClicGauche':
+                x, y = abscisse(ev), ordonnee(ev)
+                if 10 <= x <= 140 and 550 <= y <= 590:
+                    self.page_de_garde()
+                    break
+                if 420 <= x <= 580 and  550 <= y <= 590 and choix is not None:
+                    self.page_niveau()
+                
+                if 130 <= x <= 170 and 110 <= y <= 150:
+                    if not etat1:
+                        choix = 'normal'
+                        texte(130,100,'X',tag= 'teste1',taille = 40)
+                        etat1 = True
+                    else:
+                        efface('teste1')
+                        etat1 = False
+                if 130 <= x <= 170 and 210 <= y <= 250:
+                    if not etat2:
+                        choix = 'teleportation'
+                        texte(130,200,'X',tag= 'teste2',taille = 40)
+                        etat2 = True
+                    else:
+                        efface('teste2')
+                        etat2 = False 
+                if 130 <= x <= 170 and 310 <= y <= 350:
+                    if not etat3:
+                        choix = 'infinie'
+                        texte(130,300,'X',tag= 'teste3',taille = 40)
+                        etat3 = True
+                    else:
+                        efface('teste3')
+                        etat3 = False
+                if choix is None:
+                    texte(90,450,'Veuillez choisir un mode de jeu \n         ' \
+                    'pour continuer',couleur = 'red')
+                mise_a_jour()
+
     def page_niveau(self):
         """
         page de choix des niveaux avec 3 carrés dessinés par une boucle
@@ -88,6 +158,7 @@ class Interface:
         etat1 = False
         etat2 = False
         etat3 = False
+        choix = None
         while True:
             ev = attend_ev()
             tev = type_ev(ev)
@@ -97,13 +168,14 @@ class Interface:
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
                 if 10 <= x <= 140 and 550 <= y <= 590:
-                    self.page_de_garde()
+                    self.page_mode()
                     break
-                if 420 <= x <= 580 and  550 <= y <= 590:
+                if 420 <= x <= 580 and  550 <= y <= 590 and choix is not None:
                     self.page_jeu()
                 
                 if 130 <= x <= 170 and 110 <= y <= 150:
                     if not etat1:
+                        choix = 'niveau1'
                         texte(130,100,'X',tag= 'teste1',taille = 40)
                         etat1 = True
                     else:
@@ -112,6 +184,7 @@ class Interface:
                 
                 if 130 <= x <= 170 and 210 <= y <= 250:
                     if not etat2:
+                        choix = 'niveau2'
                         texte(130,200,'X',tag= 'teste2',taille = 40)
                         etat2 = True
                     else:
@@ -119,11 +192,15 @@ class Interface:
                         etat2 = False
                 if 130 <= x <= 170 and 310 <= y <= 350:
                     if not etat3:
+                        choix = 'random'
                         texte(130,300,'X',tag= 'teste3',taille = 40)
                         etat3 = True
                     else:
                         efface('teste3')
                         etat3 = False
+                if choix is None:
+                    texte(80,450,'Veuillez choisir un niveau', couleur = 'red')
+
                 mise_a_jour()
 
     def page_regle(self):
