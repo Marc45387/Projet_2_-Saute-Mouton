@@ -3,7 +3,7 @@ from pathlib import Path
 from moteur import *
 from time import *
 
-BASE_DIR = Path(__file__).parent
+base = Path(__file__).parent
 
 class Interface:
     def __init__(self):
@@ -31,7 +31,7 @@ class Interface:
         efface_tout()  
         # titre
         texte(180, 40, 'Saute Mouton', taille=30)
-        img = BASE_DIR / "img/main_menu.png"
+        img = base / "img/main_menu.png"
         # boutons 
         rectangle(210, 150, 400, 200, couleur='black', remplissage='white')
         texte(220, 160, 'Commencer')
@@ -61,28 +61,12 @@ class Interface:
             mise_a_jour()
 
     def page_mode(self):
-        
-        efface_tout()
-        texte(150, 20, 'Choix du mode', taille=30)
-        
-        rectangle(90,70,510,430)
-       
-        # case de coche
-        rectangle(130,110,170,150)
-        rectangle(130,210,170,250)
-        rectangle(130,310,170,350)
-        
-        # bouton retour et continue
-        rectangle(10, 550, 140, 590)
-        texte(30, 550, 'Retour')
-        rectangle(420, 550, 580, 590)
-        texte(430, 550, 'Continue')
-        
-        # texte
-        texte(200,110,'Normal')
-        texte(200,210,'Téléportation')
-        texte(200,310,'Infinie')
 
+        efface_tout()
+
+        img = base / "img/mode.png"
+        image(300,300,str(img),hauteur = 600, largeur = 600)
+       
         # variable à modifier 
         etat1 = False
         etat2 = False
@@ -96,39 +80,38 @@ class Interface:
                 break
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
-                if 10 <= x <= 140 and 550 <= y <= 590:
+                if 50 <= x <= 210 and 500 <= y <= 540:
                     self.page_de_garde()
                     break
-                if 420 <= x <= 580 and  550 <= y <= 590 and choix is not None:
+                if 310 <= x <= 460 and  500 <= y <= 540 and choix is not None:
                     self.page_niveau()
                 
-                if 130 <= x <= 170 and 110 <= y <= 150:
+                if 150 <= x <= 450 and 170 <= y <= 240:
                     if not etat1:
                         choix = 'normal'
-                        texte(130,100,'X',tag= 'teste1',taille = 40)
+                        texte(120,170,'▶',tag= 'teste1',taille = 40, couleur = 'red')
                         etat1 = True
                     else:
                         efface('teste1')
                         etat1 = False
-                if 130 <= x <= 170 and 210 <= y <= 250:
+                if 150 <= x <= 450 and 265 <= y <= 330:
                     if not etat2:
                         choix = 'teleportation'
-                        texte(130,200,'X',tag= 'teste2',taille = 40)
+                        texte(120,265,'▶',tag= 'teste2',taille = 40 , couleur = 'red')
                         etat2 = True
                     else:
                         efface('teste2')
                         etat2 = False 
-                if 130 <= x <= 170 and 310 <= y <= 350:
+                if 150 <= x <= 450 and 355 <= y <= 420:
                     if not etat3:
                         choix = 'infinie'
-                        texte(130,300,'X',tag= 'teste3',taille = 40)
+                        texte(120,355,'▶',tag= 'teste3',taille = 40,couleur = 'red')
                         etat3 = True
                     else:
                         efface('teste3')
                         etat3 = False
                 if choix is None:
-                    texte(90,450,'Veuillez choisir un mode de jeu \n         ' \
-                    'pour continuer',couleur = 'red')
+                    texte(90,460,'Veuillez choisir un mode de jeu', couleur = 'red', taille = 20)
                 mise_a_jour()
 
     def page_niveau(self):
@@ -138,28 +121,10 @@ class Interface:
         efface_tout()
         texte(150, 20, 'Choix du niveau', taille=30)
         
-        rectangle(90,70,510,430)
-       
-        # case de coche
-        rectangle(130,110,170,150)
-        rectangle(130,210,170,250)
-        rectangle(130,310,170,350)
-        
-        # bouton retour et continue
-        rectangle(10, 550, 140, 590)
-        texte(30, 550, 'Retour')
-        rectangle(420, 550, 580, 590)
-        texte(430, 550, 'Continue')
-        
-        # texte
-        texte(200,110,'Niveau 0')
-        texte(200,210,'Niveau 1')
-        texte(200,310,'Niveau random')
+        img = base / "img/niveau.png"
+        image(300,300,str(img),hauteur = 600, largeur = 600)
 
         # variable à modifier 
-        etat1 = False
-        etat2 = False
-        etat3 = False
         choix = None
         while True:
             ev = attend_ev()
@@ -169,37 +134,19 @@ class Interface:
                 break
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
-                if 10 <= x <= 140 and 550 <= y <= 590:
+                if 50 <= x <= 200 and 490 <= y <= 530:
                     self.page_mode()
                     break
-                if 420 <= x <= 580 and  550 <= y <= 590 and choix is not None:
+                
+                # à compléter
+                if 100 <= x <= 490 and  180 <= y <= 280:
                     self.page_jeu()
+                    break
                 
-                if 130 <= x <= 170 and 110 <= y <= 150:
-                    if not etat1:
-                        choix = 'niveau1'
-                        texte(130,100,'X',tag= 'teste1',taille = 40)
-                        etat1 = True
-                    else:
-                        efface('teste1')
-                        etat1 = False
-                
+                # niveau ramdom à ajouter 
                 if 130 <= x <= 170 and 210 <= y <= 250:
-                    if not etat2:
-                        choix = 'niveau2'
-                        texte(130,200,'X',tag= 'teste2',taille = 40)
-                        etat2 = True
-                    else:
-                        efface('teste2')
-                        etat2 = False
-                if 130 <= x <= 170 and 310 <= y <= 350:
-                    if not etat3:
-                        choix = 'random'
-                        texte(130,300,'X',tag= 'teste3',taille = 40)
-                        etat3 = True
-                    else:
-                        efface('teste3')
-                        etat3 = False
+                   pass
+
                 if choix is None:
                     texte(80,450,'Veuillez choisir un niveau', couleur = 'red')
 
@@ -210,22 +157,9 @@ class Interface:
         page des consignes et règle du jeu 
         """
         efface_tout()
-        img = BASE_DIR / "img/souris.png"
-    
-        rectangle(0,0,700,700,remplissage = 'white')
-        rectangle(120,50,520,450,epaisseur = 3)
-        
-        rectangle(10,550,140,590)
-        texte(20,550,'Retour')  
-
-        
-        image(320, 250, str(img), largeur=200, hauteur=200, ancrage='center')
-        
-        ligne(240,130,280,180)
-        texte(200,90,'Viser')
-        ligne(420,130,360,180)
-        texte(400,90,'Sauter')
-        
+        img = base / "img/page_regle.png"        
+        image(300, 300, str(img), largeur=600, hauteur=600, ancrage='center')
+        # rectangle(50,510,210,560)
         while True:
             ev = attend_ev()
             tev = type_ev(ev)
@@ -234,7 +168,7 @@ class Interface:
                 break
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
-                if 10 <= x <= 140 and 550 <= y <= 590:
+                if 50 <= x <= 210 and 510 <= y <= 560:
                     self.page_de_garde()
                     break
             mise_a_jour()
@@ -242,7 +176,7 @@ class Interface:
     def dessiner(self):
             efface_tout()
             # cadre global
-            img = BASE_DIR / "img/mouton.png"
+            img = base / "img/mouton.png"
             rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
             rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
             for m in self.lst_bloc:
