@@ -175,9 +175,7 @@ class Interface:
 
     def dessiner(self):
             efface_tout()
-            # cadre global
             img = base / "img/mouton.png"
-            rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
             rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
             for m in self.lst_bloc:
                 rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
@@ -202,7 +200,7 @@ class Interface:
                 ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
                     
             if self.perso_visible is not None:
-                image(self.mouton.x,self.mouton.y,str(img))
+                image(self.mouton.x,self.mouton.y + 7,str(img))
 
     def page_jeu(self):
         efface_tout()
