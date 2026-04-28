@@ -176,7 +176,10 @@ class Interface:
     def dessiner(self):
             efface_tout()
             img = base / "img/mouton.png"
+            img_bg = base / "img/background.png"
+            image(300,80,str(img_bg))
             rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
+            
             for m in self.lst_bloc:
                 rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
                 # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
