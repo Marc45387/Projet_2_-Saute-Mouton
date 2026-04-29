@@ -14,15 +14,21 @@ class Interface:
         self.LONGUEUR = 400 
         self.perso = {"x": 100, "y": 575, "w": 20, "h": 20}    
         self.perso_visible = True
+        self.changement_zone = False
         self.cible = None
         self.mouton = Mouton(100,575)
         self.EPAISSEUR = 20
         self.arrivee = {"ax" : 80,"ay" : 40,"bx" : 100, "by" : 60}
-        self.lst_bloc = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
+        self.lst_bloc_bas = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
                          {"ax" : 260,"ay" : 360,"bx" : 400, "by" : 370},
                          {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
-        
+        self.lst_bloc_haut = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
+                         {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
+                         {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270},
+                         {"ax" : 0,"ay" : 0,"bx" : 600, "by" : 20},
+                         {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
+        self.lst_bloc = self.lst_bloc_bas
 
     def page_de_garde(self):
         """
@@ -204,7 +210,16 @@ class Interface:
                     
             if self.perso_visible is not None:
                 image(self.mouton.x,self.mouton.y + 7,str(img))
+    
+    def changer_zone(self):
+        if self.mouton.zone == "haut":
+            self.lst_bloc = self.lst_bloc_haut
+            self.mouton.y = 580
 
+        elif self.mouton.zone == "bas":
+            self.lst_bloc = self.lst_bloc_bas
+            self.mouton.y = 10
+    
     def page_jeu(self):
         efface_tout()
         self.perso_visible = True
@@ -217,14 +232,19 @@ class Interface:
         self.mouton.vx = 0
         self.mouton.vy = 0
         efface_tout()
+
         while True:
             self.mouton.deplacer(self.lst_bloc, self.arrivee)
             self.dessiner()
+            if self.mouton.changement_zone:
+                self.changer_zone()
+                self.mouton.changement_zone = False
             
             if self.mouton.victoire:
                 rectangle(200,200,400,400,remplissage = 'white')
                 texte(370, 200, "X", couleur='red', taille=30)
                 texte(220,270,'Victoire',taille='40')
+
             ev = donne_ev()
             tev = type_ev(ev)
 
@@ -238,8 +258,11 @@ class Interface:
                 if self.mouton.victoire:
                     if 370 <= x <= 400 and 200 <= y <= 230:
                         self.mouton.victoire = False
+                        self.mouton.zone = 'bas'
+                        self.changer_zone()
                         self.page_de_garde()
                         break 
+
                 if not self.mouton.victoire:
                     if tev == 'ClicGauche' and self.mouton.en_mouvement == False: #( si on veut jouer saut par saut, enlever la 2eme conditon)
                         self.cible = (abscisse(ev), ordonnee(ev))

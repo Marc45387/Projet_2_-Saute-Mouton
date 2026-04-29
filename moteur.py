@@ -1,5 +1,8 @@
 class Mouton:
     def __init__(self, x, y):
+        #état jeu 
+        self.zone = 'bas'
+        self.changement_zone = False
         #position
         self.x = x
         self.y = y
@@ -28,7 +31,9 @@ class Mouton:
             self.en_mouvement = False
         
         if self.y < 0 :     #plafond
-            self.y = 0 + self.HAUTEUR
+            self.zone = 'haut'
+            self.changement_zone = True
+            self.y = 580
             self.vy = self.vy * self.IMPACT
         
         if self.x < 0:  #mur de gauche
