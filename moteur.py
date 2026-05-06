@@ -56,10 +56,19 @@ class Mouton:
                 #cas 1 : on tombe dessus(vy > 0)
                 if self.vy > 0 and (self.y + self.HAUTEUR - self.vy) <= bloc["ay"]:
                     self.y = bloc["ay"] - self.HAUTEUR
-                    self.vx = 0 
                     self.vy = 0 
-                    self.en_mouvement = False
-
+                    # cas du glissement (galce)
+                    if bloc.get("type") == "glace":
+                        self.vx *= 0.98 
+                        if abs(self.vx) < 0.2:
+                            self.vx = 0
+                            self.en_mouvement = False
+                        else:
+                            self.en_mouvement = True
+                    else:
+                        # bloc normal : on s'arrête net
+                        self.vx = 0 
+                        self.en_mouvement = False
                 #cas 2 : on se cogne dessous(vy < 0)
                 elif self.vy < 0:
                     self.y = bloc["by"]

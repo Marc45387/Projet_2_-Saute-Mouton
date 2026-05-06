@@ -3,13 +3,13 @@ from pathlib import Path
 from moteur import *
 from time import *
 
-base = Path(__file__).parent
 
 class Interface:
     def __init__(self):
         """
         définir les variables 
         """
+        self.base = Path(__file__).parent
         self.HAUTEUR = 400 
         self.LONGUEUR = 400 
         self.perso = {"x": 100, "y": 575, "w": 20, "h": 20}    
@@ -19,7 +19,7 @@ class Interface:
         self.mouton = Mouton(100,575)
         self.EPAISSEUR = 20
         self.arrivee = {"ax" : 80,"ay" : 40,"bx" : 100, "by" : 60}
-        self.lst_bloc_bas = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
+        self.lst_bloc_bas = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470, 'type': 'glace'},
                          {"ax" : 260,"ay" : 360,"bx" : 400, "by" : 370},
                          {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
@@ -37,7 +37,7 @@ class Interface:
         efface_tout()  
         # titre
         texte(180, 40, 'Saute Mouton', taille=30)
-        img = base / "img/main_menu.png"
+        img = self.base / "img/main_menu.png"
         # boutons 
         rectangle(210, 150, 400, 200, couleur='black', remplissage='white')
         texte(220, 160, 'Commencer')
@@ -70,7 +70,7 @@ class Interface:
 
         efface_tout()
 
-        img = base / "img/mode.png"
+        img = self.base / "img/mode.png"
         image(300,300,str(img),hauteur = 600, largeur = 600)
        
         # variable à modifier 
@@ -127,7 +127,7 @@ class Interface:
         efface_tout()
         texte(150, 20, 'Choix du niveau', taille=30)
         
-        img = base / "img/niveau.png"
+        img = self.base / "img/niveau.png"
         image(300,300,str(img),hauteur = 600, largeur = 600)
 
         # variable à modifier 
@@ -163,7 +163,7 @@ class Interface:
         page des consignes et règle du jeu 
         """
         efface_tout()
-        img = base / "img/page_regle.png"        
+        img = self.base / "img/page_regle.png"        
         image(300, 300, str(img), largeur=600, hauteur=600, ancrage='center')
         # rectangle(50,510,210,560)
         while True:
@@ -181,14 +181,19 @@ class Interface:
 
     def dessiner(self):
             efface_tout()
-            img = base / "img/mouton.png"
-            img_bg = base / "img/background.png"
+            img = self.base / "img/mouton.png"
+            img_bg = self.base / "img/background.png"
+            img_glace_1 = self.base / "img/bloc_glace.png"
             image(300,80,str(img_bg))
+            
             rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
             
             for m in self.lst_bloc:
                 rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
                 # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
+            
+            image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
+            
             if self.cible is not None:
                 centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
                 centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
