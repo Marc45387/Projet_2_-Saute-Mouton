@@ -29,6 +29,7 @@ class Interface:
                          {"ax" : 0,"ay" : 0,"bx" : 600, "by" : 20},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
         self.lst_bloc = self.lst_bloc_bas
+        self.niveau_jeu = None
 
     def page_de_garde(self):
         """
@@ -95,6 +96,7 @@ class Interface:
                 if 150 <= x <= 450 and 170 <= y <= 240:
                     if not etat1:
                         choix = 'normal'
+                        self.niveau_jeu = None
                         texte(120,170,'▶',tag= 'teste1',taille = 40, couleur = 'red')
                         etat1 = True
                     else:
@@ -111,6 +113,7 @@ class Interface:
                 if 150 <= x <= 450 and 355 <= y <= 420:
                     if not etat3:
                         choix = 'infinie'
+                        self.niveau_jeu = 'infini'
                         texte(120,355,'▶',tag= 'teste3',taille = 40,couleur = 'red')
                         etat3 = True
                     else:
@@ -192,7 +195,8 @@ class Interface:
                 rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
                 # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
             
-            image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
+            if self.mouton.zone == "bas":
+                image(135, 470, str(img_glace_1), largeur=150, hauteur=20)
             
             if self.cible is not None:
                 centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
@@ -230,6 +234,7 @@ class Interface:
         self.perso_visible = True
         self.mouton.victoire = False
         self.cible = None
+        self.mouton.niveau_jeu = self.niveau_jeu
         self.mouton.en_mouvement = False
 
         self.mouton.x = 100 
@@ -241,7 +246,7 @@ class Interface:
         while True:
             self.mouton.deplacer(self.lst_bloc, self.arrivee)
             self.dessiner()
-            if self.mouton.changement_zone:
+            if self.mouton.changement_zone and self.niveau_jeu == 'infini':
                 self.changer_zone()
                 self.mouton.changement_zone = False
             
