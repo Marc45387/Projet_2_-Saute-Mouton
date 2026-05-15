@@ -3,6 +3,7 @@ from pathlib import Path
 from moteur import *
 from time import *
 from ia import *
+import random
 
 BASE_DIR = Path(__file__).parent
 
@@ -30,8 +31,39 @@ class Interface:
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270},
                          {"ax" : 0,"ay" : 0,"bx" : 600, "by" : 20},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
+        self.portail = []
         self.lst_bloc = self.lst_bloc_bas
-        self.niveau_jeu = None
+        self.mode_jeu = None
+        self.mode_jeu_dim = None 
+        self.niveau = None
+    
+    def generer_niveau_random(self):
+        self.lst_bloc = []
+        nb_platformes = 7 
+        ecart = 30
+
+        for _ in range(nb_platformes):
+            tentative = 0 
+            valide = 0 
+            while not valide and tentative < 10:
+                tentative += 1  
+                largeur = random.randint(60, 120) 
+                ax = random.randint(50, 400)
+                ay = random.randint(100, 500)
+                bx = ax + largeur
+                by = ay + 15 
+                conflit = False
+
+                for bloc in self.lst_bloc: 
+                    if not (bx < bloc["ax"] - ecart or 
+                            ax > bloc["bx"] + ecart or 
+                            by < bloc["ay"] - ecart or 
+                            ay > bloc["by"] + ecart):
+                        conflit = True
+                        break
+                if not conflit:
+                    self.lst_bloc.append({'ax': ax, 'ay': ay, 'bx': bx, 'by': by})
+                    valide = True
 
     def page_de_garde(self):
         """
@@ -98,25 +130,29 @@ class Interface:
                 if 150 <= x <= 450 and 170 <= y <= 240:
                     if not etat1:
                         choix = 'normal'
-                        self.niveau_jeu = None
-                        texte(120,170,'▶',tag= 'teste1',taille = 40, couleur = 'red')
+                        self.mode_jeu = None
+                        texte(115,170,'▶',tag= 'teste1',taille = 40, couleur = 'red')
                         etat1 = True
                     else:
                         efface('teste1')
                         etat1 = False
+
                 if 150 <= x <= 450 and 265 <= y <= 330:
                     if not etat2:
                         choix = 'teleportation'
-                        texte(120,265,'▶',tag= 'teste2',taille = 40 , couleur = 'red')
+                        self.mode_jeu = 'tp'
+                        texte(115,265,'▶',tag= 'teste2',taille = 40 , couleur = 'red')
                         etat2 = True
                     else:
                         efface('teste2')
                         etat2 = False 
+
                 if 150 <= x <= 450 and 355 <= y <= 420:
                     if not etat3:
-                        choix = 'infinie'
-                        self.niveau_jeu = 'infini'
-                        texte(120,355,'▶',tag= 'teste3',taille = 40,couleur = 'red')
+                        choix = 'dimension'
+                        self.mode_jeu_dim = 'dimension'
+                        self.mode_jeu = None
+                        texte(115,355,'▶',tag= 'teste3',taille = 40,couleur = 'red')
                         etat3 = True
                     else:
                         efface('teste3')
@@ -130,7 +166,6 @@ class Interface:
         page de choix des niveaux avec 3 carrés dessinés
         """
         efface_tout()
-        texte(150, 20, 'Choix du niveau', taille=30)
         
         img = self.base / "img/niveau.png"
         image(300,300,str(img),hauteur = 600, largeur = 600)
@@ -145,18 +180,23 @@ class Interface:
                 break
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
+                
                 if 50 <= x <= 200 and 490 <= y <= 530:
                     self.page_mode()
                     break
                 
                 # à compléter
                 if 100 <= x <= 490 and  180 <= y <= 280:
+                    self.lst_bloc = self.lst_bloc_bas 
                     self.page_jeu()
                     break
                 
                 # niveau ramdom à ajouter 
-                if 130 <= x <= 170 and 210 <= y <= 250:
-                   pass
+                if 100 <= x <= 490 and 320 <= y <= 420:
+                    self.niveau = 'random'
+                    self.generer_niveau_random()
+                    self.page_jeu()
+                    break 
 
                 if choix is None:
                     texte(80,450,'Veuillez choisir un niveau', couleur = 'red')
@@ -185,17 +225,23 @@ class Interface:
             mise_a_jour()
 
     def dessiner(self):
-        eefface_tout()
+        efface_tout()
         img = self.base / "img/mouton.png"
         img_bg = self.base / "img/background.png"
         img_glace_1 = self.base / "img/bloc_glace.png"
         image(300,80,str(img_bg))
-        
+
         rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
         
         for m in self.lst_bloc:
             rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
-        image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
+        
+        for p in self.portail:
+            cercle(p['ex'], p['ey'], 15, couleur='blue', epaisseur=2)
+            cercle(p['sx'], p['sy'], 15, couleur='orange', epaisseur=2)
+        
+        if self.mouton.zone == 'bas' and self.niveau == None:
+            image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
         
         if self.cible is not None:
             centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
@@ -228,37 +274,55 @@ class Interface:
     
     def changer_zone(self):
         if self.mouton.zone == "haut":
-            self.lst_bloc = self.lst_bloc_haut
-            self.mouton.y = 580
+            if self.niveau == 'random':
+                self.generer_niveau_random()
+            else:
+                self.lst_bloc = self.lst_bloc_haut
+                self.mouton.y = 580
 
         elif self.mouton.zone == "bas":
-            self.lst_bloc = self.lst_bloc_bas
-            self.mouton.y = 10
+            if self.niveau == 'random':
+                self.lst_bloc = self.lst_bloc_bas
+                self.mouton.y = 10
     
     def page_jeu(self):
         efface_tout()
         self.perso_visible = True
         self.mouton.victoire = False
         self.cible = None
-        self.mouton.niveau_jeu = self.niveau_jeu
+        self.mouton.mode_jeu = None
+        self.mouton.mode_jeu_dim = self.mode_jeu_dim
         self.mouton.en_mouvement = False
 
         self.positions_simulees = []
         self.points_verts_fixes = []
         self.liste_coups = []
+        self.portail = []
 
         self.mouton.x = 100 
         self.mouton.y = 575
         self.mouton.vx = 0
         self.mouton.vy = 0
         efface_tout()
+        
+        if self.mode_jeu == 'tp':
+            self.portail.append({'ex': 50, 'ey': 300, 'sx': 550, 'sy': 100})    
+           
         while True:
             self.mouton.deplacer(self.lst_bloc, self.arrivee)
+            self.mouton.check_portail(self.portail)
             self.dessiner()
-            if self.mouton.changement_zone:
-                self.changer_zone()
-                self.mouton.changement_zone = False
-            
+            if self.mode_jeu_dim == 'dimension':
+                if self.mouton.changement_zone:
+                    self.changer_zone()
+                    if self.mode_jeu == 'tp':
+                        self.portail.append({
+                        'ex': random.randint(50, 550), 
+                        'ey': 450, 
+                        'sx': random.randint(50, 550), 
+                        'sy': 50 })
+                    self.mouton.changement_zone = False
+                                    
             if self.mouton.victoire:
                 rectangle(200,200,400,400,remplissage = 'white')
                 texte(370, 200, "X", couleur='red', taille=30)
@@ -278,6 +342,7 @@ class Interface:
                         self.mouton.victoire = False
                         self.page_de_garde()
                         break 
+
                 if not self.mouton.victoire:
                     if tev == 'ClicGauche' and self.mouton.en_mouvement == False: #( si on veut jouer saut par saut, enlever la 2eme conditon)
                         self.cible = (abscisse(ev), ordonnee(ev))

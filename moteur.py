@@ -2,7 +2,8 @@ class Mouton:
     def __init__(self, x, y):
         #état jeu 
         self.zone = 'bas'
-        self.niveau_jeu = None
+        self.mode_jeu = None
+        self.mode_jeu_dim = None
         self.changement_zone = False
         #position
         self.x = x
@@ -32,7 +33,7 @@ class Mouton:
             self.en_mouvement = False
         
         if self.y < 0 :     #plafond
-            if self.niveau_jeu == 'infini': # pour le niveau infini 
+            if self.mode_jeu_dim == 'dimension': # pour le niveau infini 
                 self.zone = 'haut'
                 self.changement_zone = True
                 self.y = 600
@@ -103,7 +104,21 @@ class Mouton:
         self.check_collision_map()
         self.check_collision_bloc(obstacles)
         self.check_arrivee(arrivee)
-    
+
+    def check_portail(self, liste_portail):
+        for p in liste_portail:
+            centre_x = self.x + (self.LARGEUR / 2)
+            centre_y = self.y + (self.HAUTEUR / 2)
+
+            dist = ((centre_x - p['ex'])**2 + (centre_y - p['ey']) ** 2) ** 0.5
+
+            if dist < 20:
+                self.x = p['sx']
+                self.y = p['sy']
+                self.vx *= 0.5 # On réduit un peu la vitesse pour éviter d'être désorienté
+                self.vy *= 0.5
+                break
+
     def impulsion(self, souris_x: int, souris_y: int):
         """ Calcule le saut en suivant exactement la direction de la souris """
         centre_x = self.x + (self.LARGEUR/2)
@@ -145,7 +160,4 @@ class Mouton:
             self.y = round(self.y)
             self.vx = 0
             self.vy = 0
-
-
-
 
