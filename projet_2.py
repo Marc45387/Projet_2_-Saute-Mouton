@@ -185,14 +185,18 @@ class Interface:
             mise_a_jour()
 
     def dessiner(self):
-        efface_tout()
-        # cadre global
-        img = BASE_DIR / "img/mouton.png"
-        rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
+        eefface_tout()
+        img = self.base / "img/mouton.png"
+        img_bg = self.base / "img/background.png"
+        img_glace_1 = self.base / "img/bloc_glace.png"
+        image(300,80,str(img_bg))
+        
         rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
+        
         for m in self.lst_bloc:
             rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
-            # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
+        image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
+        
         if self.cible is not None:
             centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
             centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
@@ -212,10 +216,6 @@ class Interface:
             # On dessine la ligne qui montre la direction du futur saut
                 ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
                 
-        if self.perso_visible is not None:
-            image(self.mouton.x,self.mouton.y,str(img))
-
-
         if hasattr(self, 'points_verts_fixes'):
             for pos in self.points_verts_fixes:
                 # On dessine chaque point d'arrivée de saut en VERT
