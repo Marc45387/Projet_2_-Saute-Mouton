@@ -31,6 +31,7 @@ class Interface:
                          {"ax" : 0,"ay" : 0,"bx" : 600, "by" : 20},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
         self.lst_bloc = self.lst_bloc_bas
+        self.niveau_jeu = None
 
     def page_de_garde(self):
         """
@@ -97,6 +98,7 @@ class Interface:
                 if 150 <= x <= 450 and 170 <= y <= 240:
                     if not etat1:
                         choix = 'normal'
+                        self.niveau_jeu = None
                         texte(120,170,'▶',tag= 'teste1',taille = 40, couleur = 'red')
                         etat1 = True
                     else:
@@ -113,6 +115,7 @@ class Interface:
                 if 150 <= x <= 450 and 355 <= y <= 420:
                     if not etat3:
                         choix = 'infinie'
+                        self.niveau_jeu = 'infini'
                         texte(120,355,'▶',tag= 'teste3',taille = 40,couleur = 'red')
                         etat3 = True
                     else:
@@ -182,30 +185,32 @@ class Interface:
             mise_a_jour()
 
     def dessiner(self):
-        efface_tout()
-        img = self.base / "img/mouton.png"
-        img_bg = self.base / "img/background.png"
-        img_glace_1 = self.base / "img/bloc_glace.png"
-        image(300,80,str(img_bg))
-        
-        rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
-        
-        for m in self.lst_bloc:
-            rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
-        image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
+            efface_tout()
+            img = self.base / "img/mouton.png"
+            img_bg = self.base / "img/background.png"
+            img_glace_1 = self.base / "img/bloc_glace.png"
+            image(300,80,str(img_bg))
+            
+            rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
+            
+            for m in self.lst_bloc:
+                rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
+                # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
+            
+            image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
+            
+            if self.cible is not None:
+                centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
+                centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
+                #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
+                dx = (self.cible[0] - centre_x) * 0.15 
+                dy = (self.cible[1] - centre_y) * 0.15
 
-        if self.cible is not None:
-            centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
-            centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
-            #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
-            dist_x = self.cible[0] - centre_x 
-            dist_y = self.cible[1] - centre_y 
-            distance_reelle = (dist_x**2 + dist_y**2)**0.5
-
-            if distance_reelle > 0:
-                force_calculee = distance_reelle * 0.1
-                force_visuelle = min(force_calculee, self.mouton.VMAX_X)
-                affichage_scale = 5
+                if dx > self.mouton.VMAX_X: dx = self.mouton.VMAX_X
+                elif dx < -self.mouton.VMAX_X: dx = -self.mouton.VMAX_X
+                
+                if dy > self.mouton.VMAX_Y: dy = self.mouton.VMAX_Y
+                elif dy < -self.mouton.VMAX_Y: dy = -self.mouton.VMAX_Y
 
                 visuel_x = centre_x + (dist_x / distance_reelle) * force_visuelle * affichage_scale
                 visuel_y = centre_y + (dist_y / distance_reelle) * force_visuelle * affichage_scale
@@ -241,6 +246,7 @@ class Interface:
         self.perso_visible = True
         self.mouton.victoire = False
         self.cible = None
+        self.mouton.niveau_jeu = self.niveau_jeu
         self.mouton.en_mouvement = False
 
         self.positions_simulees = []
@@ -255,6 +261,9 @@ class Interface:
         while True:
             self.mouton.deplacer(self.lst_bloc, self.arrivee)
             self.dessiner()
+            if self.mouton.changement_zone:
+                self.changer_zone()
+                self.mouton.changement_zone = False
             
             if self.mouton.victoire:
                 rectangle(200,200,400,400,remplissage = 'white')

@@ -2,6 +2,7 @@ class Mouton:
     def __init__(self, x, y):
         #état jeu 
         self.zone = 'bas'
+        self.niveau_jeu = None
         self.changement_zone = False
         #position
         self.x = x
@@ -31,11 +32,13 @@ class Mouton:
             self.en_mouvement = False
         
         if self.y < 0 :     #plafond
-            self.zone = 'haut'
-            self.changement_zone = True
-            self.y = 580
-            self.vy = self.vy * self.IMPACT
-        
+            if self.niveau_jeu == 'infini': # pour le niveau infini 
+                self.zone = 'haut'
+                self.changement_zone = True
+                self.y = 600
+            else: # sinon mode normal 
+                self.y = 0 
+                self.vy = self.vy * self.IMPACT
         if self.x < 0:  #mur de gauche
             self.x = 0
             self.vx = -self.vx * self.IMPACT 
@@ -76,7 +79,7 @@ class Mouton:
                     
                     if self.vx > 0: self.x += 1 
                     elif self.vx < 0: self.x -= 1
-                #cas 3 : on se cogne sru un cote
+                #cas 3 : on se cogne sur un cote
                 else: 
                     self.vx = -self.vx * self.IMPACT
                     # On détermine de quel côté on est par rapport au centre du bloc
