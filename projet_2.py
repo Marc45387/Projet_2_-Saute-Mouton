@@ -2,6 +2,7 @@ from fltk import *
 from pathlib import Path 
 from moteur import *
 from time import *
+from ia import *
 
 BASE_DIR = Path(__file__).parent
 
@@ -10,19 +11,27 @@ class Interface:
         """
         définir les variables 
         """
+        self.base = Path(__file__).parent
         self.HAUTEUR = 400 
         self.LONGUEUR = 400 
         self.perso = {"x": 100, "y": 575, "w": 20, "h": 20}    
         self.perso_visible = True
+        self.changement_zone = False
         self.cible = None
         self.mouton = Mouton(100,575)
         self.EPAISSEUR = 20
         self.arrivee = {"ax" : 80,"ay" : 40,"bx" : 100, "by" : 60}
-        self.lst_bloc = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
+        self.lst_bloc_bas = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470, 'type': 'glace'},
                          {"ax" : 260,"ay" : 360,"bx" : 400, "by" : 370},
                          {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
-        
+        self.lst_bloc_haut = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
+                         {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
+                         {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270},
+                         {"ax" : 0,"ay" : 0,"bx" : 600, "by" : 20},
+                         {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
+        self.lst_bloc = self.lst_bloc_bas
+        self.niveau_jeu = None
 
     def page_de_garde(self):
         """
@@ -31,7 +40,7 @@ class Interface:
         efface_tout()  
         # titre
         texte(180, 40, 'Saute Mouton', taille=30)
-        img = BASE_DIR / "img/main_menu.png"
+        img = self.base / "img/main_menu.png"
         # boutons 
         rectangle(210, 150, 400, 200, couleur='black', remplissage='white')
         texte(220, 160, 'Commencer')
@@ -61,28 +70,12 @@ class Interface:
             mise_a_jour()
 
     def page_mode(self):
-        
-        efface_tout()
-        texte(150, 20, 'Choix du mode', taille=30)
-        
-        rectangle(90,70,510,430)
-       
-        # case de coche
-        rectangle(130,110,170,150)
-        rectangle(130,210,170,250)
-        rectangle(130,310,170,350)
-        
-        # bouton retour et continue
-        rectangle(10, 550, 140, 590)
-        texte(30, 550, 'Retour')
-        rectangle(420, 550, 580, 590)
-        texte(430, 550, 'Continue')
-        
-        # texte
-        texte(200,110,'Normal')
-        texte(200,210,'Téléportation')
-        texte(200,310,'Infinie')
 
+        efface_tout()
+
+        img = self.base / "img/mode.png"
+        image(300,300,str(img),hauteur = 600, largeur = 600)
+       
         # variable à modifier 
         etat1 = False
         etat2 = False
@@ -96,39 +89,40 @@ class Interface:
                 break
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
-                if 10 <= x <= 140 and 550 <= y <= 590:
+                if 50 <= x <= 210 and 500 <= y <= 540:
                     self.page_de_garde()
                     break
-                if 420 <= x <= 580 and  550 <= y <= 590 and choix is not None:
+                if 310 <= x <= 460 and  500 <= y <= 540 and choix is not None:
                     self.page_niveau()
                 
-                if 130 <= x <= 170 and 110 <= y <= 150:
+                if 150 <= x <= 450 and 170 <= y <= 240:
                     if not etat1:
                         choix = 'normal'
-                        texte(130,100,'X',tag= 'teste1',taille = 40)
+                        self.niveau_jeu = None
+                        texte(120,170,'▶',tag= 'teste1',taille = 40, couleur = 'red')
                         etat1 = True
                     else:
                         efface('teste1')
                         etat1 = False
-                if 130 <= x <= 170 and 210 <= y <= 250:
+                if 150 <= x <= 450 and 265 <= y <= 330:
                     if not etat2:
                         choix = 'teleportation'
-                        texte(130,200,'X',tag= 'teste2',taille = 40)
+                        texte(120,265,'▶',tag= 'teste2',taille = 40 , couleur = 'red')
                         etat2 = True
                     else:
                         efface('teste2')
                         etat2 = False 
-                if 130 <= x <= 170 and 310 <= y <= 350:
+                if 150 <= x <= 450 and 355 <= y <= 420:
                     if not etat3:
                         choix = 'infinie'
-                        texte(130,300,'X',tag= 'teste3',taille = 40)
+                        self.niveau_jeu = 'infini'
+                        texte(120,355,'▶',tag= 'teste3',taille = 40,couleur = 'red')
                         etat3 = True
                     else:
                         efface('teste3')
                         etat3 = False
                 if choix is None:
-                    texte(90,450,'Veuillez choisir un mode de jeu \n         ' \
-                    'pour continuer',couleur = 'red')
+                    texte(90,460,'Veuillez choisir un mode de jeu', couleur = 'red', taille = 20)
                 mise_a_jour()
 
     def page_niveau(self):
@@ -138,28 +132,10 @@ class Interface:
         efface_tout()
         texte(150, 20, 'Choix du niveau', taille=30)
         
-        rectangle(90,70,510,430)
-       
-        # case de coche
-        rectangle(130,110,170,150)
-        rectangle(130,210,170,250)
-        rectangle(130,310,170,350)
-        
-        # bouton retour et continue
-        rectangle(10, 550, 140, 590)
-        texte(30, 550, 'Retour')
-        rectangle(420, 550, 580, 590)
-        texte(430, 550, 'Continue')
-        
-        # texte
-        texte(200,110,'Niveau 0')
-        texte(200,210,'Niveau 1')
-        texte(200,310,'Niveau random')
+        img = self.base / "img/niveau.png"
+        image(300,300,str(img),hauteur = 600, largeur = 600)
 
         # variable à modifier 
-        etat1 = False
-        etat2 = False
-        etat3 = False
         choix = None
         while True:
             ev = attend_ev()
@@ -169,37 +145,19 @@ class Interface:
                 break
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
-                if 10 <= x <= 140 and 550 <= y <= 590:
+                if 50 <= x <= 200 and 490 <= y <= 530:
                     self.page_mode()
                     break
-                if 420 <= x <= 580 and  550 <= y <= 590 and choix is not None:
+                
+                # à compléter
+                if 100 <= x <= 490 and  180 <= y <= 280:
                     self.page_jeu()
+                    break
                 
-                if 130 <= x <= 170 and 110 <= y <= 150:
-                    if not etat1:
-                        choix = 'niveau1'
-                        texte(130,100,'X',tag= 'teste1',taille = 40)
-                        etat1 = True
-                    else:
-                        efface('teste1')
-                        etat1 = False
-                
+                # niveau ramdom à ajouter 
                 if 130 <= x <= 170 and 210 <= y <= 250:
-                    if not etat2:
-                        choix = 'niveau2'
-                        texte(130,200,'X',tag= 'teste2',taille = 40)
-                        etat2 = True
-                    else:
-                        efface('teste2')
-                        etat2 = False
-                if 130 <= x <= 170 and 310 <= y <= 350:
-                    if not etat3:
-                        choix = 'random'
-                        texte(130,300,'X',tag= 'teste3',taille = 40)
-                        etat3 = True
-                    else:
-                        efface('teste3')
-                        etat3 = False
+                   pass
+
                 if choix is None:
                     texte(80,450,'Veuillez choisir un niveau', couleur = 'red')
 
@@ -210,22 +168,9 @@ class Interface:
         page des consignes et règle du jeu 
         """
         efface_tout()
-        img = BASE_DIR / "img/souris.png"
-    
-        rectangle(0,0,700,700,remplissage = 'white')
-        rectangle(120,50,520,450,epaisseur = 3)
-        
-        rectangle(10,550,140,590)
-        texte(20,550,'Retour')  
-
-        
-        image(320, 250, str(img), largeur=200, hauteur=200, ancrage='center')
-        
-        ligne(240,130,280,180)
-        texte(200,90,'Viser')
-        ligne(420,130,360,180)
-        texte(400,90,'Sauter')
-        
+        img = self.base / "img/page_regle.png"        
+        image(300, 300, str(img), largeur=600, hauteur=600, ancrage='center')
+        # rectangle(50,510,210,560)
         while True:
             ev = attend_ev()
             tev = type_ev(ev)
@@ -234,48 +179,73 @@ class Interface:
                 break
             if tev == 'ClicGauche':
                 x, y = abscisse(ev), ordonnee(ev)
-                if 10 <= x <= 140 and 550 <= y <= 590:
+                if 50 <= x <= 210 and 510 <= y <= 560:
                     self.page_de_garde()
                     break
             mise_a_jour()
 
     def dessiner(self):
-            efface_tout()
-            # cadre global
-            img = BASE_DIR / "img/mouton.png"
-            rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
-            rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
-            for m in self.lst_bloc:
-                rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
-                # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
-            if self.cible is not None:
-                centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
-                centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
-                #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
-                dist_x = self.cible[0] - centre_x 
-                dist_y = self.cible[1] - centre_y 
-                distance_reelle = (dist_x**2 + dist_y**2)**0.5
+        efface_tout()
+        # cadre global
+        img = BASE_DIR / "img/mouton.png"
+        rectangle(0, 0, 600, 600, epaisseur=8, couleur='red')
+        rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
+        for m in self.lst_bloc:
+            rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
+            # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
+        if self.cible is not None:
+            centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
+            centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
+            #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
+            dist_x = self.cible[0] - centre_x 
+            dist_y = self.cible[1] - centre_y 
+            distance_reelle = (dist_x**2 + dist_y**2)**0.5
 
-                if distance_reelle > 0:
-                    force_calculee = distance_reelle * 0.1
-                    force_visuelle = min(force_calculee, self.mouton.VMAX_X)
-                    affichage_scale = 5
+            if distance_reelle > 0:
+                force_calculee = distance_reelle * 0.1
+                force_visuelle = min(force_calculee, self.mouton.VMAX_X)
+                affichage_scale = 5
 
-                    visuel_x = centre_x + (dist_x / distance_reelle) * force_visuelle * affichage_scale
-                    visuel_y = centre_y + (dist_y / distance_reelle) * force_visuelle * affichage_scale
+                visuel_x = centre_x + (dist_x / distance_reelle) * force_visuelle * affichage_scale
+                visuel_y = centre_y + (dist_y / distance_reelle) * force_visuelle * affichage_scale
 
-                # On dessine la ligne qui montre la direction du futur saut
-                    ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
-                    
-            if self.perso_visible is not None:
-                image(self.mouton.x,self.mouton.y,str(img))
+            # On dessine la ligne qui montre la direction du futur saut
+                ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
+                
+        if self.perso_visible is not None:
+            image(self.mouton.x,self.mouton.y,str(img))
 
+
+        if hasattr(self, 'points_verts_fixes'):
+            for pos in self.points_verts_fixes:
+                # On dessine chaque point d'arrivée de saut en VERT
+                cercle(pos[0], pos[1], 4, couleur='red', remplissage='red')
+        
+        if self.perso_visible is not None:
+            centre_x = self.mouton.x + (self.mouton.LARGEUR/2)
+            centre_y = self.mouton.y + (self.mouton.HAUTEUR/2)
+            image(centre_x,centre_y,str(img))
+    
+    def changer_zone(self):
+        if self.mouton.zone == "haut":
+            self.lst_bloc = self.lst_bloc_haut
+            self.mouton.y = 580
+
+        elif self.mouton.zone == "bas":
+            self.lst_bloc = self.lst_bloc_bas
+            self.mouton.y = 10
+    
     def page_jeu(self):
         efface_tout()
         self.perso_visible = True
         self.mouton.victoire = False
         self.cible = None
+        self.mouton.niveau_jeu = self.niveau_jeu
         self.mouton.en_mouvement = False
+
+        self.positions_simulees = []
+        self.points_verts_fixes = []
+        self.liste_coups = []
 
         self.mouton.x = 100 
         self.mouton.y = 575
@@ -285,6 +255,9 @@ class Interface:
         while True:
             self.mouton.deplacer(self.lst_bloc, self.arrivee)
             self.dessiner()
+            if self.mouton.changement_zone:
+                self.changer_zone()
+                self.mouton.changement_zone = False
             
             if self.mouton.victoire:
                 rectangle(200,200,400,400,remplissage = 'white')
@@ -315,6 +288,37 @@ class Interface:
                             self.mouton.impulsion(self.cible[0], self.cible[1])
                             print("SAUUUUUUT")
                             self.cible = None
+
+                    if tev == 'Touche':
+                        if touche(ev) == 'space':
+                            print("Calcul de l'IA...")
+                            # On sépare bien : le chemin (coups), les points verts (validees) et les points rouges (simulees)
+                            self.liste_coups, self.position_explorees, self.positions_simulees = meilleur_coup(self.mouton.x, self.mouton.y, self.lst_bloc, self.arrivee)
+                            print(self.liste_coups)
+
+                            self.points_verts_fixes = []
+                            for coup in self.liste_coups:
+                                # coup[0] est la coordonnée (x, y) où le mouton atterrit après le saut
+                                self.points_verts_fixes.append(coup[0])
+                            
+                            print(f"Trajet trouvé : {len(self.points_verts_fixes)} atterrissages prévus.")
+                        #if self.liste_coups:
+                            #print(f"IA a trouvé {len(self.liste_coups)} coups.")
+                            #self.coup = self.liste_coups[0]
+                            #self.sim_x, self.sim_y = self.coup[1]
+                            #self.mouton.impulsion(self.sim_x, self.sim_y)
+            
+            if hasattr(self, 'liste_coups') and self.liste_coups:
+                # Si le mouton a fini son saut précédent
+                if not self.mouton.en_mouvement:
+                    #sleep(0.1)
+                    # On prend le premier saut, on l'enlève de la liste, et on saute !
+                    prochain = self.liste_coups.pop(0)
+                    nouvelle_pos_depart, coord_visee = prochain
+                    visee_x, visee_y = coord_visee
+                    print(f"Saut auto vers : {visee_x}, {visee_y}")
+                    self.mouton.impulsion(visee_x, visee_y)
+
             mise_a_jour()
             sleep(1/60)
     

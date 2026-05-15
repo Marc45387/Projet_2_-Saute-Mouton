@@ -1,5 +1,9 @@
 class Mouton:
     def __init__(self, x, y):
+        #état jeu 
+        self.zone = 'bas'
+        self.niveau_jeu = None
+        self.changement_zone = False
         #position
         self.x = x
         self.y = y
@@ -28,9 +32,13 @@ class Mouton:
             self.en_mouvement = False
         
         if self.y < 0 :     #plafond
-            self.y = 0 + self.HAUTEUR
-            self.vy = self.vy * self.IMPACT
-        
+            if self.niveau_jeu == 'infini': # pour le niveau infini 
+                self.zone = 'haut'
+                self.changement_zone = True
+                self.y = 600
+            else: # sinon mode normal 
+                self.y = 0 
+                self.vy = self.vy * self.IMPACT
         if self.x < 0:  #mur de gauche
             self.x = 0
             self.vx = -self.vx * self.IMPACT 
@@ -43,18 +51,26 @@ class Mouton:
         """Fonction qui check les collisions entre le mouton les les bloc , et le repositionne """
         for bloc in obstacles:
             if (self.x < bloc["bx"] and 
-                self.x + self.HAUTEUR > bloc["ax"] and 
+                self.x + self.LARGEUR > bloc["ax"] and 
                 self.y < bloc["by"] and 
-                self.y + self.LARGEUR > bloc["ay"]):
-                #print(True)
+                self.y + self.HAUTEUR > bloc["ay"]):
                 
                 #cas 1 : on tombe dessus(vy > 0)
                 if self.vy > 0 and (self.y + self.HAUTEUR - self.vy) <= bloc["ay"]:
                     self.y = bloc["ay"] - self.HAUTEUR
-                    self.vx = 0 
                     self.vy = 0 
-                    self.en_mouvement = False
-
+                    # cas du glissement (galce)
+                    if bloc.get("type") == "glace":
+                        self.vx *= 0.98 
+                        if abs(self.vx) < 0.2:
+                            self.vx = 0
+                            self.en_mouvement = False
+                        else:
+                            self.en_mouvement = True
+                    else:
+                        # bloc normal : on s'arrête net
+                        self.vx = 0 
+                        self.en_mouvement = False
                 #cas 2 : on se cogne dessous(vy < 0)
                 elif self.vy < 0:
                     self.y = bloc["by"]
@@ -63,13 +79,17 @@ class Mouton:
                     
                     if self.vx > 0: self.x += 1 
                     elif self.vx < 0: self.x -= 1
-                #cas 3 : on se cogne sru un cote
+                #cas 3 : on se cogne sur un cote
                 else: 
                     self.vx = -self.vx * self.IMPACT
-                    if self.x + (self.LARGEUR/2) < bloc["ax"] + (bloc["bx"]/2):
-                        self.x = bloc["ax"] - self.LARGEUR - 1
+                    # On détermine de quel côté on est par rapport au centre du bloc
+                    centre_bloc_x = (bloc["ax"] + bloc["bx"]) / 2
+                    if self.x + (self.LARGEUR / 2) < centre_bloc_x:
+                        # On est à gauche, on se place à gauche du bloc
+                        self.x = bloc["ax"] - self.LARGEUR - 0.1
                     else:
-                        self.x = bloc["bx"] + 1
+                        # On est à droite, on se place à droite du bloc
+                        self.x = bloc["bx"] + 0.1
 
     def check_arrivee(self, arrivee: dict):
         #par dessus
@@ -100,7 +120,8 @@ class Mouton:
 
             # On définit une puissance proportionnelle à la distance, 
             # mais on bride la PUISSANCE totale, pas les axes séparément.
-            puissance = min(distance * 0.05, 25.0) # 25.0 est ta nouvelle force max totale
+
+            puissance = min(distance * 0.1, 25.0) # 25.0 est ta nouvelle force max totale
 
             self.vx = dir_x * puissance
             self.vy = dir_y * puissance
@@ -108,16 +129,22 @@ class Mouton:
     
     def deplacer(self, obstacles: list, arrivee: dict):
         """Fonction qui simule le saut du mouton"""
-        self.vy = self.vy + self.GRAVITE
         if not self.en_mouvement and abs(self.vy) < self.GRAVITE and abs(self.vx) < 0.1:
             return 
         
+        self.vy = self.vy + self.GRAVITE
         #maj de la position
         self.x += self.vx
         self.y += self.vy
 
         #check des collisions
         self.check_collisions(obstacles, arrivee)
+
+        if not self.en_mouvement:
+            self.x = round(self.x)
+            self.y = round(self.y)
+            self.vx = 0
+            self.vy = 0
 
 
 
