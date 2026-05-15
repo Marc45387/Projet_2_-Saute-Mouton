@@ -14,7 +14,7 @@ class Mouton:
         self.LARGEUR = 20
         self.VMAX_X = 15.0
         self.VMAX_Y = 20.0
-        self.GRAVITE = 0.5
+        self.GRAVITE = 0.9
         self.IMPACT = 0.5
         self.FROTTEMENT = 0.9
 
@@ -85,28 +85,26 @@ class Mouton:
         self.check_arrivee(arrivee)
     
     def impulsion(self, souris_x: int, souris_y: int):
-        """ ... """
+        """ Calcule le saut en suivant exactement la direction de la souris """
         centre_x = self.x + (self.LARGEUR/2)
         centre_y = self.y + (self.HAUTEUR/2)
         
-        difference_x = souris_x - centre_x
-        difference_y = souris_y - centre_y
+        diff_x = souris_x - centre_x
+        diff_y = souris_y - centre_y
+        distance = (diff_x**2 + diff_y**2)**0.5
 
-        scale = 0.15
-        sensi_x = difference_x * scale
-        sensi_y = difference_y * scale
+        if distance > 0:
+            # On calcule la direction pure (vecteur de longueur 1)
+            dir_x = diff_x / distance
+            dir_y = diff_y / distance
 
-        #verifiction horizontale(> VMAX_X)
-        if sensi_x > self.VMAX_X: sensi_x = self.VMAX_X
-        elif sensi_x < - self.VMAX_X : sensi_x = -self.VMAX_X
-        
-        #verification verticale(> VMAX_Y)
-        if sensi_y > self.VMAX_Y: sensi_y = self.VMAX_Y
-        elif sensi_y < -self.VMAX_Y: sensi_y = -self.VMAX_Y
+            # On définit une puissance proportionnelle à la distance, 
+            # mais on bride la PUISSANCE totale, pas les axes séparément.
+            puissance = min(distance * 0.05, 25.0) # 25.0 est ta nouvelle force max totale
 
-        self.vx = sensi_x
-        self.vy = sensi_y
-        self.en_mouvement = True
+            self.vx = dir_x * puissance
+            self.vy = dir_y * puissance
+            self.en_mouvement = True
     
     def deplacer(self, obstacles: list, arrivee: dict):
         """Fonction qui simule le saut du mouton"""

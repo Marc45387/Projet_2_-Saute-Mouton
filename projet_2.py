@@ -252,20 +252,20 @@ class Interface:
                 centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
                 centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
                 #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
-                dx = (self.cible[0] - centre_x) * 0.15 
-                dy = (self.cible[1] - centre_y) * 0.15
+                dist_x = self.cible[0] - centre_x 
+                dist_y = self.cible[1] - centre_y 
+                distance_reelle = (dist_x**2 + dist_y**2)**0.5
 
-                if dx > self.mouton.VMAX_X: dx = self.mouton.VMAX_X
-                elif dx < -self.mouton.VMAX_X: dx = -self.mouton.VMAX_X
-                
-                if dy > self.mouton.VMAX_Y: dy = self.mouton.VMAX_Y
-                elif dy < -self.mouton.VMAX_Y: dy = -self.mouton.VMAX_Y
+                if distance_reelle > 0:
+                    force_calculee = distance_reelle * 0.1
+                    force_visuelle = min(force_calculee, self.mouton.VMAX_X)
+                    affichage_scale = 5
 
-                visuel_x = centre_x + (dx * 5)
-                visuel_y = centre_y + (dy * 5)
+                    visuel_x = centre_x + (dist_x / distance_reelle) * force_visuelle * affichage_scale
+                    visuel_y = centre_y + (dist_y / distance_reelle) * force_visuelle * affichage_scale
 
-                # On dessine la ligne qui montre le futur saut
-                ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
+                # On dessine la ligne qui montre la direction du futur saut
+                    ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
                     
             if self.perso_visible is not None:
                 image(self.mouton.x,self.mouton.y,str(img))
