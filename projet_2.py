@@ -2,7 +2,9 @@ from fltk import *
 from pathlib import Path 
 from moteur import *
 from time import *
+from ia import *
 
+BASE_DIR = Path(__file__).parent
 
 class Interface:
     def __init__(self):
@@ -180,41 +182,50 @@ class Interface:
             mise_a_jour()
 
     def dessiner(self):
-            efface_tout()
-            img = self.base / "img/mouton.png"
-            img_bg = self.base / "img/background.png"
-            img_glace_1 = self.base / "img/bloc_glace.png"
-            image(300,80,str(img_bg))
-            
-            rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
-            
-            for m in self.lst_bloc:
-                rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
-                # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
-            
-            image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
-            
-            if self.cible is not None:
-                centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
-                centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
-                #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
-                dx = (self.cible[0] - centre_x) * 0.15 
-                dy = (self.cible[1] - centre_y) * 0.15
+        efface_tout()
+        img = self.base / "img/mouton.png"
+        img_bg = self.base / "img/background.png"
+        img_glace_1 = self.base / "img/bloc_glace.png"
+        image(300,80,str(img_bg))
+        
+        rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
+        
+        for m in self.lst_bloc:
+            rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
+        image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
 
-                if dx > self.mouton.VMAX_X: dx = self.mouton.VMAX_X
-                elif dx < -self.mouton.VMAX_X: dx = -self.mouton.VMAX_X
-                
-                if dy > self.mouton.VMAX_Y: dy = self.mouton.VMAX_Y
-                elif dy < -self.mouton.VMAX_Y: dy = -self.mouton.VMAX_Y
+        if self.cible is not None:
+            centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
+            centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
+            #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
+            dist_x = self.cible[0] - centre_x 
+            dist_y = self.cible[1] - centre_y 
+            distance_reelle = (dist_x**2 + dist_y**2)**0.5
 
-                visuel_x = centre_x + (dx * 5)
-                visuel_y = centre_y + (dy * 5)
+            if distance_reelle > 0:
+                force_calculee = distance_reelle * 0.1
+                force_visuelle = min(force_calculee, self.mouton.VMAX_X)
+                affichage_scale = 5
 
-                # On dessine la ligne qui montre le futur saut
+                visuel_x = centre_x + (dist_x / distance_reelle) * force_visuelle * affichage_scale
+                visuel_y = centre_y + (dist_y / distance_reelle) * force_visuelle * affichage_scale
+
+            # On dessine la ligne qui montre la direction du futur saut
                 ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
-                    
-            if self.perso_visible is not None:
-                image(self.mouton.x,self.mouton.y + 7,str(img))
+        
+        if hasattr(self, 'positions_simulees'):
+            for pos in self.positions_simulees:
+                cercle(pos[0], pos[1], 2, couleur='yellow', remplissage='yellow')
+
+        if hasattr(self, 'points_verts_fixes'):
+            for pos in self.points_verts_fixes:
+                # On dessine chaque point d'arrivée de saut en VERT
+                cercle(pos[0], pos[1], 4, couleur='red', remplissage='red')
+        
+        if self.perso_visible is not None:
+            centre_x = self.mouton.x + (self.mouton.LARGEUR/2)
+            centre_y = self.mouton.y + (self.mouton.HAUTEUR/2)
+            image(centre_x,centre_y,str(img))
     
     def changer_zone(self):
         if self.mouton.zone == "haut":
@@ -232,24 +243,23 @@ class Interface:
         self.cible = None
         self.mouton.en_mouvement = False
 
+        self.positions_simulees = []
+        self.points_verts_fixes = []
+        self.liste_coups = []
+
         self.mouton.x = 100 
         self.mouton.y = 575
         self.mouton.vx = 0
         self.mouton.vy = 0
         efface_tout()
-
         while True:
             self.mouton.deplacer(self.lst_bloc, self.arrivee)
             self.dessiner()
-            if self.mouton.changement_zone:
-                self.changer_zone()
-                self.mouton.changement_zone = False
             
             if self.mouton.victoire:
                 rectangle(200,200,400,400,remplissage = 'white')
                 texte(370, 200, "X", couleur='red', taille=30)
                 texte(220,270,'Victoire',taille='40')
-
             ev = donne_ev()
             tev = type_ev(ev)
 
@@ -263,11 +273,8 @@ class Interface:
                 if self.mouton.victoire:
                     if 370 <= x <= 400 and 200 <= y <= 230:
                         self.mouton.victoire = False
-                        self.mouton.zone = 'bas'
-                        self.changer_zone()
                         self.page_de_garde()
                         break 
-
                 if not self.mouton.victoire:
                     if tev == 'ClicGauche' and self.mouton.en_mouvement == False: #( si on veut jouer saut par saut, enlever la 2eme conditon)
                         self.cible = (abscisse(ev), ordonnee(ev))
@@ -278,6 +285,37 @@ class Interface:
                             self.mouton.impulsion(self.cible[0], self.cible[1])
                             print("SAUUUUUUT")
                             self.cible = None
+
+                    if tev == 'Touche':
+                        if touche(ev) == 'space':
+                            print("Calcul de l'IA...")
+                            # On sépare bien : le chemin (coups), les points verts (validees) et les points rouges (simulees)
+                            self.liste_coups, self.position_explorees, self.positions_simulees = meilleur_coup(self.mouton.x, self.mouton.y, self.lst_bloc, self.arrivee)
+                            print(self.liste_coups)
+
+                            self.points_verts_fixes = []
+                            for coup in self.liste_coups:
+                                # coup[0] est la coordonnée (x, y) où le mouton atterrit après le saut
+                                self.points_verts_fixes.append(coup[0])
+                            
+                            print(f"Trajet trouvé : {len(self.points_verts_fixes)} atterrissages prévus.")
+                        #if self.liste_coups:
+                            #print(f"IA a trouvé {len(self.liste_coups)} coups.")
+                            #self.coup = self.liste_coups[0]
+                            #self.sim_x, self.sim_y = self.coup[1]
+                            #self.mouton.impulsion(self.sim_x, self.sim_y)
+            
+            if hasattr(self, 'liste_coups') and self.liste_coups:
+                # Si le mouton a fini son saut précédent
+                if not self.mouton.en_mouvement:
+                    #sleep(0.1)
+                    # On prend le premier saut, on l'enlève de la liste, et on saute !
+                    prochain = self.liste_coups.pop(0)
+                    nouvelle_pos_depart, coord_visee = prochain
+                    visee_x, visee_y = coord_visee
+                    print(f"Saut auto vers : {visee_x}, {visee_y}")
+                    self.mouton.impulsion(visee_x, visee_y)
+
             mise_a_jour()
             sleep(1/60)
     

@@ -17,7 +17,7 @@ class Mouton:
         self.LARGEUR = 20
         self.VMAX_X = 15.0
         self.VMAX_Y = 20.0
-        self.GRAVITE = 0.5
+        self.GRAVITE = 0.9
         self.IMPACT = 0.5
         self.FROTTEMENT = 0.9
 
@@ -48,10 +48,9 @@ class Mouton:
         """Fonction qui check les collisions entre le mouton les les bloc , et le repositionne """
         for bloc in obstacles:
             if (self.x < bloc["bx"] and 
-                self.x + self.HAUTEUR > bloc["ax"] and 
+                self.x + self.LARGEUR > bloc["ax"] and 
                 self.y < bloc["by"] and 
-                self.y + self.LARGEUR > bloc["ay"]):
-                #print(True)
+                self.y + self.HAUTEUR > bloc["ay"]):
                 
                 #cas 1 : on tombe dessus(vy > 0)
                 if self.vy > 0 and (self.y + self.HAUTEUR - self.vy) <= bloc["ay"]:
@@ -80,10 +79,14 @@ class Mouton:
                 #cas 3 : on se cogne sru un cote
                 else: 
                     self.vx = -self.vx * self.IMPACT
-                    if self.x + (self.LARGEUR/2) < bloc["ax"] + (bloc["bx"]/2):
-                        self.x = bloc["ax"] - self.LARGEUR - 1
+                    # On détermine de quel côté on est par rapport au centre du bloc
+                    centre_bloc_x = (bloc["ax"] + bloc["bx"]) / 2
+                    if self.x + (self.LARGEUR / 2) < centre_bloc_x:
+                        # On est à gauche, on se place à gauche du bloc
+                        self.x = bloc["ax"] - self.LARGEUR - 0.1
                     else:
-                        self.x = bloc["bx"] + 1
+                        # On est à droite, on se place à droite du bloc
+                        self.x = bloc["bx"] + 0.1
 
     def check_arrivee(self, arrivee: dict):
         #par dessus
@@ -99,41 +102,45 @@ class Mouton:
         self.check_arrivee(arrivee)
     
     def impulsion(self, souris_x: int, souris_y: int):
-        """ ... """
+        """ Calcule le saut en suivant exactement la direction de la souris """
         centre_x = self.x + (self.LARGEUR/2)
         centre_y = self.y + (self.HAUTEUR/2)
         
-        difference_x = souris_x - centre_x
-        difference_y = souris_y - centre_y
+        diff_x = souris_x - centre_x
+        diff_y = souris_y - centre_y
+        distance = (diff_x**2 + diff_y**2)**0.5
 
-        scale = 0.15
-        sensi_x = difference_x * scale
-        sensi_y = difference_y * scale
+        if distance > 0:
+            # On calcule la direction pure (vecteur de longueur 1)
+            dir_x = diff_x / distance
+            dir_y = diff_y / distance
 
-        #verifiction horizontale(> VMAX_X)
-        if sensi_x > self.VMAX_X: sensi_x = self.VMAX_X
-        elif sensi_x < - self.VMAX_X : sensi_x = -self.VMAX_X
-        
-        #verification verticale(> VMAX_Y)
-        if sensi_y > self.VMAX_Y: sensi_y = self.VMAX_Y
-        elif sensi_y < -self.VMAX_Y: sensi_y = -self.VMAX_Y
+            # On définit une puissance proportionnelle à la distance, 
+            # mais on bride la PUISSANCE totale, pas les axes séparément.
+            puissance = min(distance * 0.1, 25.0) # 25.0 est ta nouvelle force max totale
 
-        self.vx = sensi_x
-        self.vy = sensi_y
-        self.en_mouvement = True
+            self.vx = dir_x * puissance
+            self.vy = dir_y * puissance
+            self.en_mouvement = True
     
     def deplacer(self, obstacles: list, arrivee: dict):
         """Fonction qui simule le saut du mouton"""
-        self.vy = self.vy + self.GRAVITE
         if not self.en_mouvement and abs(self.vy) < self.GRAVITE and abs(self.vx) < 0.1:
             return 
         
+        self.vy = self.vy + self.GRAVITE
         #maj de la position
         self.x += self.vx
         self.y += self.vy
 
         #check des collisions
         self.check_collisions(obstacles, arrivee)
+
+        if not self.en_mouvement:
+            self.x = round(self.x)
+            self.y = round(self.y)
+            self.vx = 0
+            self.vy = 0
 
 
 
