@@ -185,38 +185,38 @@ class Interface:
             mise_a_jour()
 
     def dessiner(self):
-            efface_tout()
-            img = self.base / "img/mouton.png"
-            img_bg = self.base / "img/background.png"
-            img_glace_1 = self.base / "img/bloc_glace.png"
-            image(300,80,str(img_bg))
-            
-            rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
-            
-            for m in self.lst_bloc:
-                rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
-                # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
-            
-            image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
-            
-            if self.cible is not None:
-                centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
-                centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
-                #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
-                dx = (self.cible[0] - centre_x) * 0.15 
-                dy = (self.cible[1] - centre_y) * 0.15
+        efface_tout()
+        img = self.base / "img/mouton.png"
+        img_bg = self.base / "img/background.png"
+        img_glace_1 = self.base / "img/bloc_glace.png"
+        image(300,80,str(img_bg))
+        
+        rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
+        
+        for m in self.lst_bloc:
+            rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
+            # DEBUG HITBOX BLOC : rectangle(m["ax"], m["ay"], m["ax"] + m["bx"], m["ay"] + m["by"], couleur='green', epaisseur=1)
+        
+        image(135,470,str(img_glace_1),largeur = 150,hauteur = 20)
+        
+        if self.cible is not None:
+            centre_x = self.mouton.x + (self.mouton.LARGEUR / 2)
+            centre_y = self.mouton.y + (self.mouton.HAUTEUR / 2)
+            #ligne(self.perso['x'] + 10, self.perso['y'] + 10, self.cible[0], self.cible[1], couleur='red', epaisseur=2)
+            dx = (self.cible[0] - centre_x) * 0.15 
+            dy = (self.cible[1] - centre_y) * 0.15
 
-                if dx > self.mouton.VMAX_X: dx = self.mouton.VMAX_X
-                elif dx < -self.mouton.VMAX_X: dx = -self.mouton.VMAX_X
-                
-                if dy > self.mouton.VMAX_Y: dy = self.mouton.VMAX_Y
-                elif dy < -self.mouton.VMAX_Y: dy = -self.mouton.VMAX_Y
+            if dx > self.mouton.VMAX_X: dx = self.mouton.VMAX_X
+            elif dx < -self.mouton.VMAX_X: dx = -self.mouton.VMAX_X
+            
+            if dy > self.mouton.VMAX_Y: dy = self.mouton.VMAX_Y
+            elif dy < -self.mouton.VMAX_Y: dy = -self.mouton.VMAX_Y
 
-                visuel_x = centre_x + (dist_x / distance_reelle) * force_visuelle * affichage_scale
-                visuel_y = centre_y + (dist_y / distance_reelle) * force_visuelle * affichage_scale
+            visuel_x = centre_x + (dist_x / distance_reelle) * force_visuelle * affichage_scale
+            visuel_y = centre_y + (dist_y / distance_reelle) * force_visuelle * affichage_scale
 
-            # On dessine la ligne qui montre la direction du futur saut
-                ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
+        # On dessine la ligne qui montre la direction du futur saut
+            ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
         
         if hasattr(self, 'positions_simulees'):
             for pos in self.positions_simulees:
