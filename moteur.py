@@ -48,49 +48,50 @@ class Mouton:
             self.x = 600 - self.LARGEUR
             self.vx = -self.vx * self.IMPACT
     
+    
     def check_collision_bloc(self, obstacles: list):
-        """Fonction qui check les collisions entre le mouton les les bloc , et le repositionne """
+        """Fonction qui check les collisions entre le mouton et les blocs, et le repositionne correctement"""
         for bloc in obstacles:
             if (self.x < bloc["bx"] and 
                 self.x + self.LARGEUR > bloc["ax"] and 
                 self.y < bloc["by"] and 
                 self.y + self.HAUTEUR > bloc["ay"]):
                 
-                #cas 1 : on tombe dessus(vy > 0)
-                if self.vy > 0 and (self.y + self.HAUTEUR - self.vy) <= bloc["ay"]:
-                    self.y = bloc["ay"] - self.HAUTEUR
-                    self.vy = 0 
-                    # cas du glissement (galce)
-                    if bloc.get("type") == "glace":
-                        self.vx *= 0.98 
-                        if abs(self.vx) < 0.2:
-                            self.vx = 0
-                            self.en_mouvement = False
+                #Calcul des chevauchements sur chaque axe
+                overlap_x = min(self.x + self.LARGEUR, bloc["bx"]) - max(self.x, bloc["ax"])
+                overlap_y = min(self.y + self.HAUTEUR, bloc["by"]) - max(self.y, bloc["ay"])
+
+                if overlap_y < overlap_x:
+                    # Collision Verticale
+                    if self.vy > 0 and (self.y + self.HAUTEUR - self.vy) <= bloc["ay"] + 2: # Tolérance dynamique
+                        # Par le dessus
+                        self.y = bloc["ay"] - self.HAUTEUR
+                        self.vy = 0 
+                        if bloc.get("type") == "glace":
+                            self.vx *= 0.98 
+                            if abs(self.vx) < 0.2:
+                                self.vx = 0
+                                self.en_mouvement = False
+                            else:
+                                self.en_mouvement = True
                         else:
-                            self.en_mouvement = True
-                    else:
-                        # bloc normal : on s'arrête net
-                        self.vx = 0 
-                        self.en_mouvement = False
-                #cas 2 : on se cogne dessous(vy < 0)
-                elif self.vy < 0:
-                    self.y = bloc["by"]
-                    self.vy = 0 
-                    self.vx = self.vx * 0.8 
-                    
-                    if self.vx > 0: self.x += 1 
-                    elif self.vx < 0: self.x -= 1
-                #cas 3 : on se cogne sur un cote
-                else: 
+                            self.vx = 0 
+                            self.en_mouvement = False
+                    elif self.vy < 0:
+                        # Par le dessous
+                        self.y = bloc["by"]
+                        self.vy = 0 
+                        self.vx *= 0.8 
+                        if self.vx > 0: self.x += 1 
+                        elif self.vx < 0: self.x -= 1
+                else:
                     self.vx = -self.vx * self.IMPACT
-                    # On détermine de quel côté on est par rapport au centre du bloc
-                    centre_bloc_x = (bloc["ax"] + bloc["bx"]) / 2
-                    if self.x + (self.LARGEUR / 2) < centre_bloc_x:
-                        # On est à gauche, on se place à gauche du bloc
-                        self.x = bloc["ax"] - self.LARGEUR - 0.1
+                    if self.x + (self.LARGEUR / 2) < (bloc["ax"] + bloc["bx"]) / 2:
+                        #On est a gauche -> repousse a gauche 
+                        self.x = bloc["ax"] - self.LARGEUR
                     else:
-                        # On est à droite, on se place à droite du bloc
-                        self.x = bloc["bx"] + 0.1
+                        #On est a droite -> repousse a droite
+                        self.x = bloc["bx"]
 
     def check_arrivee(self, arrivee: dict):
          if (arrivee["ax"] <= self.x <= arrivee["bx"]  and 

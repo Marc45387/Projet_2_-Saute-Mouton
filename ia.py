@@ -63,6 +63,9 @@ def ia_multi_options(coord_x: int, coord_y: int, obstacles: list, arrivee: dict,
     return [(opt[1], opt[2]) for opt in toutes_les_options[:nb_options]]
 
 def meilleur_coup(coord_x: int, coord_y: int, obstacles: list, arrivee: dict):
+    """
+    renvoie 
+    """
     # Frontière : [(priorité, position, chemin)]
     frontiere = [(0, (coord_x, coord_y), [])]
     deja_visite = [] 
@@ -106,5 +109,4 @@ def meilleur_coup(coord_x: int, coord_y: int, obstacles: list, arrivee: dict):
             priorite = len(nouveau_chemin) * 500 + d
             frontiere.append((priorite, nouvelle_pos, nouveau_chemin))
 
-    #Si aucun chemin parfait, on renvoie le chemin qui s'en est le plus approché
     return meilleur_essai, deja_visite, toutes_simulations
