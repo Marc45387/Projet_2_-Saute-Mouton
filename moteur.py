@@ -91,7 +91,7 @@ class Mouton:
                             self.x = bloc["bx"]
 
     def check_arrivee(self, arrivee: dict):
-         if self.zone == 'bas':
+         if self.zone == 'bas' and self.mode_jeu_dim == 'dimension':
              return
          
          if (arrivee["ax"] <= self.x <= arrivee["bx"]  and 

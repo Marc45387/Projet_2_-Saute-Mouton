@@ -34,7 +34,7 @@ class Interface:
         self.lst_bloc_haut = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
                          {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270},
-                         {"ax" : 0,"ay" : 0,"bx" : 600, "by" : 20},
+                         {"ax" : 250,"ay" : 160,"bx" : 350, "by" : 170},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
         self.porte_dimension = {"ax": 440, "ay": 30, "bx": 490, "by": 80}
         self.portail = []
@@ -249,6 +249,9 @@ class Interface:
         if self.mouton.zone == 'haut':
             rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
         
+        if self.mode_jeu_dim != 'dimension':
+            rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow')
+        
         for m in self.lst_bloc:
             rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
         
@@ -353,6 +356,7 @@ class Interface:
                 self.check_porte_dimension()
             self.mouton.check_portail(self.portail)
             self.dessiner()
+        
             if self.mode_jeu_dim == 'dimension':
                 if self.mouton.changement_zone:
                     self.changer_zone()
