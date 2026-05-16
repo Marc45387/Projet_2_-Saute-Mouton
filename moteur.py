@@ -53,41 +53,42 @@ class Mouton:
                 self.y < bloc["by"] and 
                 self.y + self.HAUTEUR > bloc["ay"]):
                 
-                #Calcul des chevauchements sur chaque axe
+                #calcul des chevauchements
                 overlap_x = min(self.x + self.LARGEUR, bloc["bx"]) - max(self.x, bloc["ax"])
                 overlap_y = min(self.y + self.HAUTEUR, bloc["by"]) - max(self.y, bloc["ay"])
 
-                if overlap_y < overlap_x:
-                    # Collision Verticale
-                    if self.vy > 0 and (self.y + self.HAUTEUR - self.vy) <= bloc["ay"] + 2: # Tolérance dynamique
-                        # Par le dessus
-                        self.y = bloc["ay"] - self.HAUTEUR
-                        self.vy = 0 
-                        if bloc.get("type") == "glace":
-                            self.vx *= 0.98 
-                            if abs(self.vx) < 0.2:
-                                self.vx = 0
-                                self.en_mouvement = False
-                            else:
-                                self.en_mouvement = True
-                        else:
-                            self.vx = 0 
+                if self.vy >= 0 and (self.y + self.HAUTEUR - self.vy) <= bloc["ay"] + 5:
+                    self.y = bloc["ay"] - self.HAUTEUR
+                    self.vy = 0 
+                    if bloc.get("type") == "glace":
+                        self.vx *= 0.98 
+                        if abs(self.vx) < 0.2:
+                            self.vx = 0
                             self.en_mouvement = False
-                    elif self.vy < 0:
-                        # Par le dessous
+                        else:
+                            self.en_mouvement = True
+                    else:
+                        self.vx = 0 
+                        self.en_mouvement = False
+
+                elif overlap_y < overlap_x:
+                    #par le dessou
+                    if self.vy < 0:
                         self.y = bloc["by"]
                         self.vy = 0 
                         self.vx *= 0.8 
                         if self.vx > 0: self.x += 1 
                         elif self.vx < 0: self.x -= 1
                 else:
-                    self.vx = -self.vx * self.IMPACT
-                    if self.x + (self.LARGEUR / 2) < (bloc["ax"] + bloc["bx"]) / 2:
-                        #On est a gauche -> repousse a gauche 
-                        self.x = bloc["ax"] - self.LARGEUR
-                    else:
-                        #On est a droite -> repousse a droite
-                        self.x = bloc["bx"]
+                    #On ne repousse sur le côté que si le mouton ne frôle pas juste le bord supérieur
+                    if self.y + self.HAUTEUR > bloc["ay"] + 5:
+                        self.vx = -self.vx * self.IMPACT
+                        if self.x + (self.LARGEUR / 2) < (bloc["ax"] + bloc["bx"]) / 2:
+                            # On est à gauche -> repousse à gauche 
+                            self.x = bloc["ax"] - self.LARGEUR
+                        else:
+                            # On est à droite -> repousse à droite
+                            self.x = bloc["bx"]
 
     def check_arrivee(self, arrivee: dict):
          if self.zone == 'bas':
