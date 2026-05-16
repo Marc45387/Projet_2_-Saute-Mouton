@@ -1,5 +1,6 @@
 from moteur import *
 from math import *
+from fltk import *
 
 def simule_saut(coord_x: int, coord_y: int, souris_x: int, souris_y: int, obstacles: list, arrivee: dict):
     fantome = Mouton(coord_x, coord_y)
@@ -7,18 +8,16 @@ def simule_saut(coord_x: int, coord_y: int, souris_x: int, souris_y: int, obstac
     fantome.HAUTEUR = 20
 
     fantome.impulsion(souris_x, souris_y)
-    #fantome.en_mouvement = True
     
-    # Simulation sur 200 frames maximum
+    #simulation sur 800 frames
     limit = 0
     while limit < 800:
         fantome.deplacer(obstacles, arrivee)
         limit += 1
 
-        #if abs(fantome.vx) < 0.1 and abs(fantome.vy) <= fantome.GRAVITE:# arret complet
         if not fantome.en_mouvement:
             break
-        # Arrêt si vitesse quasi nulle pour gagner du temps
+
         if fantome.victoire:
             break
     
@@ -31,7 +30,7 @@ def ia_multi_options(coord_x: int, coord_y: int, obstacles: list, arrivee: dict,
     cx = (arrivee['ax'] + arrivee['bx']) // 2
     cy = (arrivee['ay'] + arrivee['by']) // 2
 
-    # Balayage plus large pour être sûr de trouver une issue
+    #balayage de differents angles et puissances
     for angle_deg in range(0, 181, 1): 
         angle_rad = radians(angle_deg)
         for force in range(50, 251, 10): 
@@ -44,18 +43,17 @@ def ia_multi_options(coord_x: int, coord_y: int, obstacles: list, arrivee: dict,
             dist_arrivee = sqrt((cx - x)**2 + (cy - y)**2)
             dist_parcourue = sqrt((x - coord_x)**2 + (y - coord_y)**2)
             
-            # On accepte même les petits mouvements si on est bloqué
+            #accepte même les petits mouvements si on est bloqué
             if dist_parcourue < 30: 
                 continue
             
             dist_laterale = abs(x - coord_x)
             progression_y = coord_y - y
-            # Score : distance + bonus si on monte
-            if progression_y < -20:  # Si le mouton tombe de plus de 20 pixels
-                # On donne un énorme malus (score élevé = mauvais coup)
+
+            if progression_y < -20:
                 score_tmp = dist_arrivee + 2000 
+            
             else:
-                # On favorise grandement la montée (multiplicateur x3 ou x4)
                 score_tmp = dist_arrivee - (progression_y * 10) - (dist_laterale * 2)
 
             toutes_les_options.append((score_tmp, (x,y), (test_x, test_y)))
@@ -69,16 +67,15 @@ def meilleur_coup(coord_x: int, coord_y: int, obstacles: list, arrivee: dict):
     frontiere = [(0, (coord_x, coord_y), [])]
     deja_visite = [] 
     toutes_simulations = []
-    max_sauts = 10 # Réduir pour plus de rapidité
+    max_sauts = 10
     
-    meilleur_essai = [] # Au cas où on n'atteint pas l'arrivée
+    meilleur_essai = [] 
     min_dist_globale = float('+inf')
 
     while frontiere:
         frontiere.sort(key=lambda x: x[0])
         score_actuel, (curr_x, curr_y), chemin = frontiere.pop(0)
 
-        # Victoire ?
         if arrivee["ax"] <= curr_x <= arrivee["bx"] and arrivee["ay"] <= curr_y <= arrivee["by"]:
             return chemin, deja_visite, toutes_simulations
 
@@ -109,5 +106,5 @@ def meilleur_coup(coord_x: int, coord_y: int, obstacles: list, arrivee: dict):
             priorite = len(nouveau_chemin) * 500 + d
             frontiere.append((priorite, nouvelle_pos, nouveau_chemin))
 
-    # Si aucun chemin parfait, on renvoie le chemin qui s'en est le plus approché
+    #Si aucun chemin parfait, on renvoie le chemin qui s'en est le plus approché
     return meilleur_essai, deja_visite, toutes_simulations

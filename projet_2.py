@@ -270,10 +270,14 @@ class Interface:
             # On dessine la ligne qui montre la direction du futur saut
                 ligne(centre_x, centre_y, visuel_x, visuel_y, couleur='red', epaisseur=2)
                 
-        if hasattr(self, 'points_verts_fixes'):
-            for pos in self.points_verts_fixes:
-                # On dessine chaque point d'arrivée de saut en VERT
-                cercle(pos[0], pos[1], 4, couleur='red', remplissage='red')
+        
+        for jsp in self.positions_simulees:
+            cercle(jsp[0], jsp[1], 2, couleur='orange', remplissage='orange')
+
+        for pos in self.points_verts_fixes:
+            cercle(pos[0], pos[1], 4, couleur='red', remplissage='red')
+
+        
         
         if self.perso_visible is not None:
             centre_x = self.mouton.x + (self.mouton.LARGEUR/2)

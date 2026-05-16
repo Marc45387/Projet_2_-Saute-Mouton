@@ -76,7 +76,7 @@ class Mouton:
                 elif self.vy < 0:
                     self.y = bloc["by"]
                     self.vy = 0 
-                    self.vx = self.vx * 0.8 #reduction de vitesse a l'impact pour la chute
+                    self.vx = self.vx * 0.8 
                     
                     if self.vx > 0: self.x += 1 
                     elif self.vx < 0: self.x -= 1
@@ -93,10 +93,8 @@ class Mouton:
                         self.x = bloc["bx"] + 0.1
 
     def check_arrivee(self, arrivee: dict):
-        #par dessus
          if (arrivee["ax"] <= self.x <= arrivee["bx"]  and 
              arrivee["ay"] <= self.y <= arrivee["by"]):
-             #print("VICTOIRE")
              self.victoire = True
         
     def check_collisions(self, obstacles: list, arrivee: dict):
@@ -115,7 +113,7 @@ class Mouton:
             if dist < 20:
                 self.x = p['sx']
                 self.y = p['sy']
-                self.vx *= 0.5 # On réduit un peu la vitesse pour éviter d'être désorienté
+                self.vx *= 0.5 
                 self.vy *= 0.5
                 break
 
@@ -129,14 +127,11 @@ class Mouton:
         distance = (diff_x**2 + diff_y**2)**0.5
 
         if distance > 0:
-            # On calcule la direction pure (vecteur de longueur 1)
+            
             dir_x = diff_x / distance
             dir_y = diff_y / distance
 
-            # On définit une puissance proportionnelle à la distance, 
-            # mais on bride la PUISSANCE totale, pas les axes séparément.
-
-            puissance = min(distance * 0.1, 25.0) # 25.0 est ta nouvelle force max totale
+            puissance = min(distance * 0.1, 25.0)
 
             self.vx = dir_x * puissance
             self.vy = dir_y * puissance
@@ -152,7 +147,6 @@ class Mouton:
         self.x += self.vx
         self.y += self.vy
 
-        #check des collisions
         self.check_collisions(obstacles, arrivee)
 
         if not self.en_mouvement:
