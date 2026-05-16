@@ -297,7 +297,9 @@ class Interface:
             image(centre_x,centre_y,str(img))
     
     def check_porte_dimension(self):
-        
+        """
+        vérifie si les coordonnées du portail avec le mouton et change de map
+        """        
         p = self.porte_dimension
         if (p["ax"] <= self.mouton.x <= p["bx"] and
             p["ay"] <= self.mouton.y <= p["by"]):

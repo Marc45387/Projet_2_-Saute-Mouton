@@ -91,12 +91,13 @@ class Mouton:
                             self.x = bloc["bx"]
 
     def check_arrivee(self, arrivee: dict):
-         if self.zone == 'bas' and self.mode_jeu_dim == 'dimension':
-             return
+        # supprime le point d'arrivé dans la map 1 du mode dimension
+        if self.zone == 'bas' and self.mode_jeu_dim == 'dimension': 
+            return
          
-         if (arrivee["ax"] <= self.x <= arrivee["bx"]  and 
-             arrivee["ay"] <= self.y <= arrivee["by"]):
-             self.victoire = True
+        if (arrivee["ax"] <= self.x <= arrivee["bx"]  and 
+            arrivee["ay"] <= self.y <= arrivee["by"]):
+            self.victoire = True
         
     def check_collisions(self, obstacles: list, arrivee: dict):
         """check toutes les collisions possibles"""
@@ -104,7 +105,10 @@ class Mouton:
         self.check_collision_bloc(obstacles)
         self.check_arrivee(arrivee)
 
-    def check_portail(self, liste_portail):
+    def check_portail(self, liste_portail: list):
+        """
+        vérifie les coordonnées du protail 
+        """
         for p in liste_portail:
             centre_x = self.x + (self.LARGEUR / 2)
             centre_y = self.y + (self.HAUTEUR / 2)
