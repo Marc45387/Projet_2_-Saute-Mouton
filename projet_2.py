@@ -18,6 +18,7 @@ class Interface:
         self.perso = {"x": 100, "y": 575, "w": 20, "h": 20}    
         self.perso_visible = True
         self.changement_zone = False
+        self.map_random = False
         self.cible = None
         self.mode_jeu = None
         self.mode_jeu_dim = None 
@@ -28,12 +29,14 @@ class Interface:
         self.lst_bloc_bas = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470, 'type': 'glace'},
                          {"ax" : 260,"ay" : 360,"bx" : 400, "by" : 370},
                          {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
-                         {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
+                         {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270},
+                         {"ax" : 380,"ay" : 80,"bx" : 540, "by" : 90}]
         self.lst_bloc_haut = [{"ax" : 60,"ay" : 460,"bx" : 200, "by" : 470},
                          {"ax" : 60,"ay" : 60,"bx" : 200, "by" : 70},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270},
                          {"ax" : 0,"ay" : 0,"bx" : 600, "by" : 20},
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
+        self.porte_dimension = {"ax": 440, "ay": 30, "bx": 490, "by": 80}
         self.portail = []
         self.lst_bloc = self.lst_bloc_bas
     
@@ -118,6 +121,9 @@ class Interface:
         etat2 = False
         etat3 = False
         choix = None
+        self.mode_jeu = None
+        self.mode_jeu_dim = None
+
         while True:
             ev = attend_ev()
             tev = type_ev(ev)
@@ -156,7 +162,6 @@ class Interface:
                     if not etat3:
                         choix = 'dimension'
                         self.mode_jeu_dim = 'dimension'
-                        self.mode_jeu = None
                         texte(115,355,'▶',tag= 'teste3',taille = 40,couleur = 'red')
                         etat3 = True
                     else:
@@ -192,6 +197,7 @@ class Interface:
                 
                 # à compléter
                 if 100 <= x <= 490 and  180 <= y <= 280:
+                    self.niveau = None
                     self.lst_bloc = self.lst_bloc_bas 
                     self.page_jeu()
                     break
@@ -237,9 +243,11 @@ class Interface:
         img = self.base / "img/mouton.png"
         img_bg = self.base / "img/background.png"
         img_glace_1 = self.base / "img/bloc_glace.png"
+        img_portail = self.base / "img/portail.png"
         image(300,80,str(img_bg))
 
-        rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
+        if self.mouton.zone == 'haut':
+            rectangle(self.arrivee["ax"],self.arrivee["ay"],self.arrivee["bx"],self.arrivee["by"],remplissage = 'yellow') # rectangle de point d'arrivé
         
         for m in self.lst_bloc:
             rectangle(m["ax"], m["ay"], m["bx"], m["by"] , remplissage='blue')
@@ -263,7 +271,7 @@ class Interface:
                 force_calculee = distance_reelle * 0.1
                 force_visuelle = min(force_calculee, self.mouton.VMAX_X)
                 affichage_scale = 5
-
+                #purple
                 visuel_x = centre_x + (dist_x / distance_reelle) * force_visuelle * affichage_scale
                 visuel_y = centre_y + (dist_y / distance_reelle) * force_visuelle * affichage_scale
 
@@ -277,26 +285,39 @@ class Interface:
         for pos in self.points_verts_fixes:
             cercle(pos[0], pos[1], 4, couleur='red', remplissage='red')
 
-        
+        if self.mode_jeu_dim == 'dimension' and self.mouton.zone == 'bas':
+            image(440,55,str(img_portail),largeur = 60, hauteur = 60)
         
         if self.perso_visible is not None:
             centre_x = self.mouton.x + (self.mouton.LARGEUR/2)
             centre_y = self.mouton.y + (self.mouton.HAUTEUR/2)
             image(centre_x,centre_y,str(img))
     
+    def check_porte_dimension(self):
+        
+        p = self.porte_dimension
+        if (p["ax"] <= self.mouton.x <= p["bx"] and
+            p["ay"] <= self.mouton.y <= p["by"]):
+            self.mouton.zone = 'haut'
+            self.changer_zone()
+
     def changer_zone(self):
         """
         la focntion qui change la zone du mouton et met à jour les plateformes 
         """
         if self.mouton.zone == "haut":
             if self.niveau == 'random':
-                self.generer_niveau_random()
+                if not self.map_random:
+                    self.generer_niveau_random()
+                    self.map_random = True
             else:
                 self.lst_bloc = self.lst_bloc_haut
                 self.mouton.y = 580
 
         elif self.mouton.zone == "bas":
             if self.niveau == 'random':
+                self.generer_niveau_random()
+            else:
                 self.lst_bloc = self.lst_bloc_bas
                 self.mouton.y = 10
     
@@ -328,6 +349,8 @@ class Interface:
            
         while True:
             self.mouton.deplacer(self.lst_bloc, self.arrivee)
+            if self.mode_jeu_dim == 'dimension':
+                self.check_porte_dimension()
             self.mouton.check_portail(self.portail)
             self.dessiner()
             if self.mode_jeu_dim == 'dimension':
@@ -345,6 +368,7 @@ class Interface:
                 rectangle(200,200,400,400,remplissage = 'white')
                 texte(370, 200, "X", couleur='red', taille=30)
                 texte(220,270,'Victoire',taille='40')
+            
             ev = donne_ev()
             tev = type_ev(ev)
 
@@ -357,6 +381,7 @@ class Interface:
                 
                 if self.mouton.victoire:
                     if 370 <= x <= 400 and 200 <= y <= 230:
+                        self.mouton.zone = 'bas'
                         self.mouton.victoire = False
                         self.page_de_garde()
                         break 

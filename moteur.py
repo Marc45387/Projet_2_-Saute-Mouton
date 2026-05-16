@@ -32,14 +32,10 @@ class Mouton:
             self.vy = 0
             self.en_mouvement = False
         
-        if self.y < 0 :     #plafond
-            if self.mode_jeu_dim == 'dimension': # pour le niveau infini 
-                self.zone = 'haut'
-                self.changement_zone = True
-                self.y = 600
-            else: # sinon mode normal 
+        if self.y < 0 :     #plafond  
                 self.y = 0 
                 self.vy = self.vy * self.IMPACT
+
         if self.x < 0:  #mur de gauche
             self.x = 0
             self.vx = -self.vx * self.IMPACT 
@@ -94,6 +90,9 @@ class Mouton:
                         self.x = bloc["bx"]
 
     def check_arrivee(self, arrivee: dict):
+         if self.zone == 'bas':
+             return
+         
          if (arrivee["ax"] <= self.x <= arrivee["bx"]  and 
              arrivee["ay"] <= self.y <= arrivee["by"]):
              self.victoire = True
