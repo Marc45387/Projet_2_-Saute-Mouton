@@ -19,6 +19,9 @@ class Interface:
         self.perso_visible = True
         self.changement_zone = False
         self.cible = None
+        self.mode_jeu = None
+        self.mode_jeu_dim = None 
+        self.niveau = None
         self.mouton = Mouton(100,575)
         self.EPAISSEUR = 20
         self.arrivee = {"ax" : 80,"ay" : 40,"bx" : 100, "by" : 60}
@@ -33,11 +36,11 @@ class Interface:
                          {"ax" : 180,"ay" : 260,"bx" : 300, "by" : 270}]
         self.portail = []
         self.lst_bloc = self.lst_bloc_bas
-        self.mode_jeu = None
-        self.mode_jeu_dim = None 
-        self.niveau = None
     
     def generer_niveau_random(self):
+        """
+        génère la liste de plateforme de manière aléatoire
+        """
         self.lst_bloc = []
         nb_platformes = 7 
         ecart = 30
@@ -102,7 +105,9 @@ class Interface:
             mise_a_jour()
 
     def page_mode(self):
-
+        """
+        la page qui affiche le choix du mode de jeu
+        """
         efface_tout()
 
         img = self.base / "img/mode.png"
@@ -225,6 +230,9 @@ class Interface:
             mise_a_jour()
 
     def dessiner(self):
+        """
+        la fonction qui dessine les éléments graphismes sur la partie de jeu
+        """
         efface_tout()
         img = self.base / "img/mouton.png"
         img_bg = self.base / "img/background.png"
@@ -273,6 +281,9 @@ class Interface:
             image(centre_x,centre_y,str(img))
     
     def changer_zone(self):
+        """
+        la focntion qui change la zone du mouton et met à jour les plateformes 
+        """
         if self.mouton.zone == "haut":
             if self.niveau == 'random':
                 self.generer_niveau_random()
@@ -286,6 +297,9 @@ class Interface:
                 self.mouton.y = 10
     
     def page_jeu(self):
+        """
+        la page du jeu 
+        """
         efface_tout()
         self.perso_visible = True
         self.mouton.victoire = False
