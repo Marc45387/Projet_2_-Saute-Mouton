@@ -91,6 +91,7 @@ class Mouton:
                             self.x = bloc["bx"]
 
     def check_arrivee(self, arrivee: dict):
+        """fonction check si le mouton est arrive"""
         # supprime le point d'arrivé dans la map 1 du mode dimension
         if self.zone == 'bas' and self.mode_jeu_dim == 'dimension': 
             return

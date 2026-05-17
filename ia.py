@@ -3,6 +3,10 @@ from math import *
 from fltk import *
 
 def simule_saut(coord_x: int, coord_y: int, souris_x: int, souris_y: int, obstacles: list, arrivee: dict):
+    """
+    Simule un saut et renvoie la position finale (x, y) du mouton après s'être arrêté 
+    ou avoir atteint l'arrivée.
+    """
     fantome = Mouton(coord_x, coord_y)
     fantome.LARGEUR = 20 
     fantome.HAUTEUR = 20
@@ -26,6 +30,10 @@ def simule_saut(coord_x: int, coord_y: int, souris_x: int, souris_y: int, obstac
     return (fantome.x, fantome.y)
 
 def ia_multi_options(coord_x: int, coord_y: int, obstacles: list, arrivee: dict, nb_options=16):
+    """
+    Simule plein de sauts différents (angles/puissances) et renvoie la liste 
+    des 'nb_options' meilleurs coups trouvés.
+    """
     toutes_les_options = []
     cx = (arrivee['ax'] + arrivee['bx']) // 2
     cy = (arrivee['ay'] + arrivee['by']) // 2
@@ -64,7 +72,8 @@ def ia_multi_options(coord_x: int, coord_y: int, obstacles: list, arrivee: dict,
 
 def meilleur_coup(coord_x: int, coord_y: int, obstacles: list, arrivee: dict):
     """
-    renvoie 
+    Calcule et renvoie le chemin optimal (suite de sauts) pour amener le mouton 
+    jusqu'à la zone d'arrivée.
     """
     # Frontière : [(priorité, position, chemin)]
     frontiere = [(0, (coord_x, coord_y), [])]
